@@ -1,6 +1,6 @@
 module.exports = {
   session: {
-    driver: 'memory',
+    driver: 'file',
     stores: {
       memory: {
         maxSize: 500,
