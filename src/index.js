@@ -26,7 +26,13 @@ module.exports = async function App(context) {
 }
 
 async function SayHi(context) {
-  await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
+  if (process.env.chatroomPlatform == 'telegram') {
+    await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
+  }
+  else if (process.env.chatroomPlatform == 'line') {
+    console.log(context)
+    await context.sendText(`Hi`);
+  }
 }
 
 async function YeReply(context) {
