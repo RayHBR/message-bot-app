@@ -26,8 +26,9 @@ module.exports = async function App(context) {
 }
 
 async function SayHi(context) {
-  await context.sendText(`Hi.`);
-  //await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
+  console.log(context);
+  //await context.sendText(`Hi.`);
+  await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
 }
 
 async function YeReply(context) {
