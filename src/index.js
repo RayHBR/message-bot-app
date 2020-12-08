@@ -8,13 +8,13 @@ module.exports = async function App(context) {
   else if (context.event.text.indexOf("yee") != -1) {
     return YeeReply;
   }
-  else if (context.event.text.indexOf("月亮") != -1) {
+  else if (context.event.text == "月亮") {
     return moonReply;
   }
-  else if (context.event.text.indexOf("天氣") != -1) {
+  else if (context.event.text == "天氣") {
     return weatherReply;
   }
-  else if (context.event.text.indexOf("生宵") != -1) {
+  else if (context.event.text == "生宵") {
     return zodiacReply;
   }
   else if (context.event.text == "智障") {
