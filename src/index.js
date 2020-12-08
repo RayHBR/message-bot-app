@@ -53,7 +53,3 @@ async function zodiacReply(context) {
   var zodiacReply = "🐭🐮🐯🐰🐲🐍🐴🐐🐒🐓🐕🐷";
   await context.sendText(zodiacReply);
 }
-
-async function Unknown(context) {
-  await context.sendText('Sorry.');
-}
