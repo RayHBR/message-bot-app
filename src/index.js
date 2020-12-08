@@ -1,5 +1,5 @@
 module.exports = async function App(context) {
-  if (context.event.text == "hi") {
+  if (context.event.text.indexOf("hi") != -1 || context.event.text.indexOf("Hi") != -1 || context.event.text.indexOf("HI") != -1) {
     return SayHi;
   }
   else if (context.event.text.indexOf("楷翊") != -1) {
@@ -26,9 +26,14 @@ module.exports = async function App(context) {
 }
 
 async function SayHi(context) {
-  console.log(context);
-  //await context.sendText(`Hi.`);
-  await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
+  console.log(context)
+  if (context.session.platform == 'telegram') {
+    await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
+  }
+  else if (context.session.platform == 'line') {
+    console.log(context.event)
+    await context.sendText(`Hi.`);
+  }
 }
 
 async function YeReply(context) {
