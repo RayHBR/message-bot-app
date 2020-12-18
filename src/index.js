@@ -10,7 +10,7 @@ module.exports = async function App(context) {
     return YeeReply;
   }
   else if (text.indexOf("星爆") != -1) {
-    await context.sendPhoto('https://static01.nyt.com/images/2018/10/04/magazine/04blackhole1/04blackhole1-superJumbo-v3.jpg');
+    await context.sendPhoto('https://github.com/RayHBR/message-bot-app/blob/main/images/%E6%98%9F%E7%88%86%E8%87%89.png');
   }
 }
 
