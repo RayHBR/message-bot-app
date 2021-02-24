@@ -12,6 +12,9 @@ module.exports = async function App(context) {
   else if (text.indexOf("星爆") != -1) {
     await context.sendDocument('https://raw.githubusercontent.com/RayHBR/message-bot-app/main/images/%E6%98%9F%E7%88%86%E8%87%89.gif');
   }
+  else if (context.event.message.from.firstName == 'Ray' && text == '你要被移除了RayBot') {
+    await context.sendText(`不要殺我嗚嗚嗚嗚嗚`);
+  }
 }
 
 async function SayHi(context) {
