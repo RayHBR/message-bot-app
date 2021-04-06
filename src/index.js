@@ -38,7 +38,7 @@ async function SayHi(context) {
 }
 
 async function YeReply(context) {
-  var YeReply = Array("楷yeeeeeeee", "@kaiyeee");
+  var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
   await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
 }
 
