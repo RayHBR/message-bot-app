@@ -43,7 +43,14 @@ async function YeReply(context) {
 }
 
 function Weather(context) {
-  const url = `https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-459C0E19-B48C-4564-A8A6-AC00FC0F0BF9&format=JSON&locationName=新北市&startTime=2021-04-07T06:00:00`
+  var Today = new Date();
+  if (Today.getHours() > 12) {
+    Today.setDate(Today.getDate() + 1);
+  }
+  var year = Today.getFullYear();
+  var month = (Today.getMonth() + 1 < 10 ? '0' : '') + (Today.getMonth() + 1);
+  var day = (Today.getDate() < 10 ? '0' : '') + Today.getDate();
+  const url = `https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=${process.env.WEATHER_TOKEN}&format=JSON&locationName=新北市&startTime=${year}-${month}-${day}T06:00:00`
   fetch(encodeURI(url), {method:'GET'})
   .then(res => {
       return res.text();
@@ -54,6 +61,7 @@ function Weather(context) {
       var MinT = results.weatherElement[2].time[0].parameter.parameterName;
       var CI = results.weatherElement[3].time[0].parameter.parameterName;
       var MaxT = results.weatherElement[4].time[0].parameter.parameterName;
+      await context.sendText(`${year}/${month}/${day} 天氣預報`);
       await context.sendText(`${Wx} 最低溫度：${MinT} 最高溫度：${MaxT} 降雨機率：${PoP}% ${CI}`);
   });
 }
