@@ -43,11 +43,10 @@ async function YeReply(context) {
 }
 
 function Weather(context) {
-  var Today = new Date();
+  var Today = new Date().toLocaleString();
   if (Today.getHours() > 12) {
     Today.setDate(Today.getDate() + 1);
   }
-  console.log(Today)
   var year = Today.getFullYear();
   var month = (Today.getMonth() + 1 < 10 ? '0' : '') + (Today.getMonth() + 1);
   var day = (Today.getDate() < 10 ? '0' : '') + Today.getDate();
