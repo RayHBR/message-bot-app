@@ -43,8 +43,9 @@ async function YeReply(context) {
 }
 
 function Weather(context) {
-  var Today = new Date().toLocaleString();
-  if (Today.getHours() > 12) {
+  var Today = new Date();
+  console.log(Today.getHours())
+  if (Today.getHours() > 0) {
     Today.setDate(Today.getDate() + 1);
   }
   var year = Today.getFullYear();
