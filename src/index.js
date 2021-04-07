@@ -15,6 +15,9 @@ module.exports = async function App(context) {
   else if (text == '明天天氣') {
     return Weather;
   }
+  else if (text == '1') {
+    return Stock_Realtime;
+  }
   else if (context.session.platform == 'telegram' && text == '你要被移除了RayBot') {
     if (context.event.message.from.firstName == 'Ray') {
       await context.sendText(`不要殺我嗚嗚嗚嗚`);
@@ -64,5 +67,12 @@ function Weather(context) {
       var MaxT = results.weatherElement[4].time[0].parameter.parameterName;
       await context.sendText(`${year}/${month}/${day} 天氣預報`);
       await context.sendText(`${Wx} 最低溫度：${MinT} 最高溫度：${MaxT} 降雨機率：${PoP}% ${CI}`);
+  });
+}
+
+function Stock_Realtime(context) {
+  var child_process = require("child_process");
+  child_process.exec('python ./stock/realtime.py 1', async function (error, stdout, stderr) {
+    await context.sendText(stdout);
   });
 }
