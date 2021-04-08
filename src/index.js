@@ -15,6 +15,9 @@ module.exports = async function App(context) {
   else if (text == '明天天氣') {
     return Weather;
   }
+  else if (/(^\/stock [0-9][0-9][0-9][0-9])/.test(text)) {
+    return StockRealtime;
+  }
   else if (context.session.platform == 'telegram' && text == '你要被移除了RayBot') {
     if (context.event.message.from.firstName == 'Ray') {
       await context.sendText(`不要殺我嗚嗚嗚嗚`);
@@ -64,5 +67,19 @@ function Weather(context) {
       var MaxT = results.weatherElement[4].time[0].parameter.parameterName;
       await context.sendText(`${year}/${month}/${day} 天氣預報`);
       await context.sendText(`${Wx} 最低溫度：${MinT} 最高溫度：${MaxT} 降雨機率：${PoP}% ${CI}`);
+  });
+}
+
+function StockRealtime(context) {
+  var num = context.event.text.split(' ')
+  const url = `https://stock-bot-app.herokuapp.com/StockRealtime/${num[1]}`
+  fetch(encodeURI(url), {method:'GET'})
+  .then(res => {
+    return res.text();
+  }).then(async result => {
+    var rt = JSON.parse(result);
+    var name = rt.info.name;
+    var price = rt.realtime.latest_trade_price
+    await context.sendText(`${name}: ${price}`);
   });
 }
