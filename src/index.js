@@ -78,8 +78,13 @@ function StockRealtime(context) {
     return res.text();
   }).then(async result => {
     var rt = JSON.parse(result);
-    var name = rt.info.name;
-    var price = rt.realtime.latest_trade_price
-    await context.sendText(`${name}: ${price}`);
+    if (rt.success == true) {
+      var name = rt.info.name;
+      var price = rt.realtime.latest_trade_price
+      await context.sendText(`${name}: ${price}`);
+    }
+    else {
+      await context.sendText(`股票代號有誤!`);
+    }
   });
 }
