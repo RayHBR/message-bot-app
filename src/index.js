@@ -73,6 +73,7 @@ function Weather(context) {
 function StockRealtime(context) {
   var num = context.event.text.split(' ')
   const url = `https://stock-bot-app.herokuapp.com/StockRealtime/${num[1]}`
+  //const url = `http://127.0.0.1:5000/StockRealtime/${num[1]}`
   fetch(encodeURI(url), {method:'GET'})
   .then(res => {
     return res.text();
@@ -81,7 +82,14 @@ function StockRealtime(context) {
     if (rt.success == true) {
       var name = rt.info.name;
       var price = rt.realtime.latest_trade_price
-      await context.sendText(`${name}: ${price}`);
+      if (price == '-') 
+      {
+        await context.sendText(`${name}: - (`);
+      }
+      else 
+      {
+        await context.sendText(`${name}: ${price}`);
+      }
     }
     else {
       await context.sendText(`股票代號有誤!`);
