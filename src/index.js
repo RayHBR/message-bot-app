@@ -12,6 +12,20 @@ module.exports = async function App(context) {
   else if (text.indexOf("星爆") != -1) {
     await context.sendDocument('https://raw.githubusercontent.com/RayHBR/message-bot-app/main/images/%E6%98%9F%E7%88%86%E8%87%89.gif');
   }
+  else if (text == '我想玩1A2B') {
+    var num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    var answer = [];
+    for (var i=0; i<4; i++) {
+      var idx = Math.floor(Math.random()*num.length);
+      answer.push(num[idx]);
+      num.splice(idx, 1);
+    }
+    var count = ((answer[0] * 1000) + (answer[1] * 100) + (answer[2] * 10) +  + answer[3]);
+    await context.sendDocument(count);
+    context.setState({
+      count: count,
+    });
+  }
   else if (text == '明天天氣') {
     return Weather;
   }
