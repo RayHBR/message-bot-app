@@ -21,7 +21,7 @@ module.exports = async function App(context) {
       num.splice(idx, 1);
     }
     var count = ((answer[0] * 1000) + (answer[1] * 100) + (answer[2] * 10) +  + answer[3]);
-    await context.sendDocument(count);
+    await context.sendText(count);
     context.setState({
       count: count,
     });
