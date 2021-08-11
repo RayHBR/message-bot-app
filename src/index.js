@@ -47,6 +47,9 @@ module.exports = async function App(context) {
       await context.sendText(A + 'A' + B + 'B');
     }
   }
+  else if (text == '測試參數') {
+    await context.sendText(context.state.count);
+  }
   else if (text == '明天天氣') {
     return Weather;
   }
