@@ -15,16 +15,37 @@ module.exports = async function App(context) {
   else if (text == '我想玩1A2B') {
     var num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     var answer = [];
-    for (var i=0; i<4; i++) {
+    for (var i = 0; i < 4; i++) {
       var idx = Math.floor(Math.random()*num.length);
       answer.push(num[idx]);
       num.splice(idx, 1);
     }
-    var count = ((answer[0] * 1000) + (answer[1] * 100) + (answer[2] * 10) +  + answer[3]);
-    await context.sendText(count);
     context.setState({
-      count: count,
+      count: answer,
     });
+  }
+  else if (/^[0-9]+$/.test(text) && text.length == 4 && context.state.count != 0) {
+    var A = 0
+    var B = 0;
+    text = text.split('');
+    for (var i = 0; i < 4; i++) {
+      var idx = context.state.count.indexOf(text[i]);
+      if (idx != -1) {
+          if (idx == i)
+            A++;
+          else
+            B++;
+      }
+    }
+    if (A == 4) {
+      context.setState({
+        count: 0,
+      });
+      await context.sendText('勝利！');
+    }
+    else {
+      await context.sendText(A + 'A' + B + 'B');
+    }
   }
   else if (text == '明天天氣') {
     return Weather;
