@@ -20,7 +20,7 @@ module.exports = {
       },
     },
   },
-  initialState: {count: [1,2,3,4]},
+  initialState: {count: 0},
   channels: {
     messenger: {
       enabled: false,

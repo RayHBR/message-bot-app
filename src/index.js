@@ -14,14 +14,14 @@ module.exports = async function App(context) {
   }
   else if (text == '我想玩1A2B') {
     var num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    var answer = [];
+    var answer = '';
     for (var i = 0; i < 4; i++) {
       var idx = Math.floor(Math.random()*num.length);
-      answer.push(num[idx]);
+      answer += num[idx] + ',';
       num.splice(idx, 1);
     }
     context.setState({
-      count: answer,
+      count: answer.substring(0, answer.length - 1),
     });
   }
   else if (/^[0-9]+$/.test(text) && text.length == 4 && context.state.count != 0) {
@@ -29,7 +29,8 @@ module.exports = async function App(context) {
     var B = 0;
     text = text.split('');
     for (var i = 0; i < 4; i++) {
-      var idx = context.state.count.indexOf(text[i]);
+      var ans = context.state.count.split(',')
+      var idx = ans.indexOf(text[i]);
       if (idx != -1) {
           if (idx == i)
             A++;
