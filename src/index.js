@@ -47,7 +47,7 @@ module.exports = async function App(context) {
     fs.writeFileSync( './clientinfo/users.json', JSON.stringify(clientinfo), 'utf-8')
     await context.sendText(result);
   }
-  else if (text.toLowerCase() == '!plus') {
+  else if (text.toLowerCase() == '!plus' && name == 'Ray') {
     var clientinfo = checkPoint(clientinfo, id);
     for (i = 0; i < clientinfo.users.length; i++) {
       if (id == clientinfo.users[i].userID) {
