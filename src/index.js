@@ -74,6 +74,7 @@ async function Start_1A2B(context) {
 }
 
 async function Guess_1A2B(context) {
+  var text = context.event.text;
   var name = context.event.message.from.firstName;
   var A = 0
   var B = 0;
