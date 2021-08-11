@@ -39,7 +39,7 @@ module.exports = async function App(context) {
     for (i = 0; i < Object.keys(userPoint).length; i++) {
       result += Object.keys(userPoint)[i] + '：' + userPoint[Object.keys(userPoint)[i]] + '\r\n';
     }
-    fs.writeFileSync( './userpoint.json', JSON.stringify(userPoint), 'utf-8')
+    fs.writeFileSync( './clientinfo/userpoint.json', JSON.stringify(userPoint), 'utf-8')
     await context.sendText(result);
   }
   else if (text == '!1A2B') {
@@ -63,7 +63,7 @@ module.exports = async function App(context) {
     if (A == 4) {
       var userPoint = checkPoint(context);
       userPoint[name] = userPoint[name] + 10
-      fs.writeFileSync( './userpoint.json', JSON.stringify(userPoint), 'utf-8')
+      fs.writeFileSync( './clientinfo/userpoint.json', JSON.stringify(userPoint), 'utf-8')
       context.setState({
         Ans_1A2B: 0,
         Count_1A2B: 0,
@@ -78,6 +78,7 @@ module.exports = async function App(context) {
     }
   } 
   else if (text == 'test') {
+    console.log(context.event)
     await context.sendText(context.event);
   }
   
@@ -105,7 +106,7 @@ async function Start_1A2B(context) {
 }
 
 function checkPoint(context) {
-  var userPoint = fs.readFileSync('./userpoint.json', 'utf-8');
+  var userPoint = fs.readFileSync('./clientinfo/userpoint.json', 'utf-8');
   userPoint = JSON.parse(userPoint);
   var name = context.event.message.from.firstName;
   if (userPoint[name] == null) {
