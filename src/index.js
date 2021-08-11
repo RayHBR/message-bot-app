@@ -23,6 +23,7 @@ module.exports = async function App(context) {
     context.setState({
       count: answer.substring(0, answer.length - 1),
     });
+    await context.sendText('好了，開始吧！');
   }
   else if (/^[0-9]+$/.test(text) && text.length == 4 && context.state.count != 0) {
     var A = 0
