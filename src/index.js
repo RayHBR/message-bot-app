@@ -3,12 +3,24 @@ const fs = require('fs')
 
 module.exports = async function App(context) {
   var text = context.event.text;
-  var name = context.event.message.from.firstName;
+  var name = '';
+  if (context.session.platform == 'telegram') {
+    name = context.event.message.from.firstName;
+  }
   if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
-    return SayHi;
+    if (context.session.platform == 'telegram') {
+      await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
+    }
+    else if (context.session.platform == 'line') {
+      await context.sendText(`Hi.`);
+    }
+    else {
+      await context.sendText(`Hi.`);
+    }
   }
   else if (text.indexOf("楷翊") != -1) {
-    return YeReply;
+    var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
+    await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
   }
   else if (text.indexOf("星爆") != -1) {
     await context.sendDocument('https://raw.githubusercontent.com/RayHBR/message-bot-app/main/images/%E6%98%9F%E7%88%86%E8%87%89.gif');
@@ -56,7 +68,7 @@ module.exports = async function App(context) {
         Ans_1A2B: 0,
         Count_1A2B: 0,
       });
-      await context.sendText( name + ' 勝利了！一共猜了' + count + '次');
+      await context.sendText( name + ' 勝利了！一共猜了' + count + '次！');
     }
     else {
       context.setState({
@@ -64,40 +76,18 @@ module.exports = async function App(context) {
       });
       await context.sendText(A + 'A' + B + 'B');
     }
+  } 
+  else if (text == 'test') {
+    await context.sendText(context.event);
   }
-  else if (text == '!weather') {
+  
+  else if (text.toLowerCase() == '!weather') {
     return Weather;
   }
+
   else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
     return StockRealtime;
   }
-}
-
-async function SayHi(context) {
-  if (context.session.platform == 'telegram') {
-    await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
-  }
-  else if (context.session.platform == 'line') {
-    await context.sendText(`Hi.`);
-  }
-  else {
-    await context.sendText(`Hi.`);
-  }
-}
-
-async function YeReply(context) {
-  var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
-  await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
-}
-
-function checkPoint(context) {
-  var userPoint = fs.readFileSync('./userpoint.json', 'utf-8');
-  userPoint = JSON.parse(userPoint);
-  var name = context.event.message.from.firstName;
-  if (userPoint[name] == null) {
-    userPoint[name] = 100;
-  }
-  return userPoint;
 }
 
 async function Start_1A2B(context) {
@@ -112,6 +102,16 @@ async function Start_1A2B(context) {
     Ans_1A2B: answer.substring(0, answer.length - 1),
   });
   await context.sendText('好了，開始吧！');
+}
+
+function checkPoint(context) {
+  var userPoint = fs.readFileSync('./userpoint.json', 'utf-8');
+  userPoint = JSON.parse(userPoint);
+  var name = context.event.message.from.firstName;
+  if (userPoint[name] == null) {
+    userPoint[name] = 100;
+  }
+  return userPoint;
 }
 
 function Weather(context) {
