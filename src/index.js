@@ -1,5 +1,5 @@
 const fetch = require("node-fetch");
-
+const fs = require('fs')
 
 module.exports = async function App(context) {
   var text = context.event.text;
@@ -21,15 +21,13 @@ module.exports = async function App(context) {
       await context.sendText(`就是你要殺我!!!`);
     }
   }
-  else if (text == '!Point') {
-    var userPoint = JSON.parse(context.state.Point);
-    if (userPoint[name] == null) {
-      userPoint[name] = 100;
-    }
+  else if (text.toLowerCase() == '!point') {
+    var userPoint = checkPoint(context);
     var result = '';
     for (i = 0; i < Object.keys(userPoint).length; i++) {
       result += Object.keys(userPoint)[i] + '：' + userPoint[Object.keys(userPoint)[i]] + '\r\n';
     }
+    fs.writeFileSync( './userpoint.json', JSON.stringify(userPoint), 'utf-8')
     await context.sendText(result);
   }
   else if (text == '!1A2B') {
@@ -38,6 +36,7 @@ module.exports = async function App(context) {
   else if (/^[0-9]+$/.test(text) && text.length == 4 && context.state.count != 0) {
     var A = 0
     var B = 0;
+    var count = context.state.Count_1A2B + 1;
     text = text.split('');
     for (var i = 0; i < 4; i++) {
       var ans = context.state.Ans_1A2B.split(',')
@@ -50,15 +49,19 @@ module.exports = async function App(context) {
       }
     }
     if (A == 4) {
-      var userPoint =JSON.parse(context.state.Point);
+      var userPoint = checkPoint(context);
       userPoint[name] = userPoint[name] + 10
+      fs.writeFileSync( './userpoint.json', JSON.stringify(userPoint), 'utf-8')
       context.setState({
         Ans_1A2B: 0,
-        Point: JSON.stringify(userPoint),
+        Count_1A2B: 0,
       });
-      await context.sendText('勝利！');
+      await context.sendText( name + ' 勝利了！一共猜了' + count + '次');
     }
     else {
+      context.setState({
+        Count_1A2B: count,
+      });
       await context.sendText(A + 'A' + B + 'B');
     }
   }
@@ -85,6 +88,16 @@ async function SayHi(context) {
 async function YeReply(context) {
   var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
   await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
+}
+
+function checkPoint(context) {
+  var userPoint = fs.readFileSync('./userpoint.json', 'utf-8');
+  userPoint = JSON.parse(userPoint);
+  var name = context.event.message.from.firstName;
+  if (userPoint[name] == null) {
+    userPoint[name] = 100;
+  }
+  return userPoint;
 }
 
 async function Start_1A2B(context) {
