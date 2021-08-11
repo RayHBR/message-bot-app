@@ -17,12 +17,15 @@ module.exports = async function App(context) {
     if (context.event.message.from.firstName == 'Ray') {
       await context.sendText(`不要殺我嗚嗚嗚嗚`);
     }
-    else if (context.event.message.from.firstName == 'kaiyeee') {
+    else if (context.event.message.from.firstName == 'Chang') {
       await context.sendText(`就是你要殺我!!!`);
     }
   }
   else if (text == '!Point') {
     var userPoint = JSON.parse(context.state.Point);
+    if (userPoint[name] == null) {
+      userPoint[name] = 100;
+    }
     var result = '';
     for (i = 0; i < Object.keys(userPoint).length; i++) {
       result += Object.keys(userPoint)[i] + '：' + userPoint[Object.keys(userPoint)[i]] + '\r\n';
