@@ -2,11 +2,13 @@ const fetch = require("node-fetch");
 const fs = require('fs')
 
 module.exports = async function App(context) {
+  var id, name;
   var text = context.event.text;
-  var name = '';
   if (context.session.platform == 'telegram') {
+    id = context.event.message.from.id;
     name = context.event.message.from.firstName;
   }
+  var clientinfo = fs.readFileSync('./clientinfo/users.json', 'utf-8');
   if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
     if (context.session.platform == 'telegram') {
       await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
@@ -34,12 +36,15 @@ module.exports = async function App(context) {
     }
   }
   else if (text.toLowerCase() == '!point') {
-    var userPoint = checkPoint(context);
+    var clientinfo = checkPoint(context, clientinfo, id);
     var result = '';
-    for (i = 0; i < Object.keys(userPoint).length; i++) {
-      result += Object.keys(userPoint)[i] + '：' + userPoint[Object.keys(userPoint)[i]] + '\r\n';
+    for (i = 0; i < clientinfo.users.length; i++) {
+      if (id == clientinfo.users[i].userID) {
+        result = name + ' 你現在有 ' + clientinfo.users[i].point + ' 點！';
+        break;
+      }
     }
-    fs.writeFileSync( './clientinfo/userpoint.json', JSON.stringify(userPoint), 'utf-8')
+    fs.writeFileSync( './clientinfo/users.json', JSON.stringify(userPoint), 'utf-8')
     await context.sendText(result);
   }
   else if (text == '!1A2B') {
@@ -61,9 +66,14 @@ module.exports = async function App(context) {
       }
     }
     if (A == 4) {
-      var userPoint = checkPoint(context);
-      userPoint[name] = userPoint[name] + 10
-      fs.writeFileSync( './clientinfo/userpoint.json', JSON.stringify(userPoint), 'utf-8')
+      var clientinfo = checkPoint(clientinfo, id);
+      for (i = 0; i < clientinfo.users.length; i++) {
+        if (id == clientinfo.users[i].userID) {
+          clientinfo.users[i].point = clientinfo.users[i].point + 10;
+          break;
+        }
+      }
+      fs.writeFileSync( './clientinfo/users.json', JSON.stringify(clientinfo), 'utf-8')
       context.setState({
         Ans_1A2B: 0,
         Count_1A2B: 0,
@@ -105,14 +115,17 @@ async function Start_1A2B(context) {
   await context.sendText('好了，開始吧！');
 }
 
-function checkPoint(context) {
-  var userPoint = fs.readFileSync('./clientinfo/userpoint.json', 'utf-8');
-  userPoint = JSON.parse(userPoint);
-  var name = context.event.message.from.firstName;
-  if (userPoint[name] == null) {
-    userPoint[name] = 100;
+function checkPoint(clientinfo, id) {
+  clientinfo = JSON.parse(clientinfo);
+  for (i = 0; i < clientinfo.users.length; i++) {
+    if (id != clientinfo.users[i].userID && i == clientinfo.users.length - 1) {
+      clientinfo.users.push({
+        userID: id,
+        point: 100
+      });
+    }
   }
-  return userPoint;
+  return clientinfo;
 }
 
 function Weather(context) {

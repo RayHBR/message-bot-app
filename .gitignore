@@ -65,5 +65,4 @@ typings/
 # bat file
 push.bat
 
-# point file
-userpoint.json
+# user file
