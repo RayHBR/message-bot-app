@@ -3,6 +3,7 @@ const fetch = require("node-fetch");
 
 module.exports = async function App(context) {
   var text = context.event.text;
+  var name = context.event.message.from.firstName;
   if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
     return SayHi;
   }
@@ -32,7 +33,31 @@ module.exports = async function App(context) {
     return Start_1A2B;
   }
   else if (/^[0-9]+$/.test(text) && text.length == 4 && context.state.count != 0) {
-    return Guess_1A2B;
+    var A = 0
+    var B = 0;
+    text = text.split('');
+    for (var i = 0; i < 4; i++) {
+      var ans = context.state.Ans_1A2B.split(',')
+      var idx = ans.indexOf(text[i]);
+      if (idx != -1) {
+          if (idx == i)
+            A++;
+          else
+            B++;
+      }
+    }
+    if (A == 4) {
+      var userPoint =JSON.parse(context.state.Point);
+      userPoint[name] = userPoint[name] + 10
+      context.setState({
+        Ans_1A2B: 0,
+        Point: JSON.stringify(userPoint),
+      });
+      await context.sendText('勝利！');
+    }
+    else {
+      await context.sendText(A + 'A' + B + 'B');
+    }
   }
   else if (text == '!weather') {
     return Weather;
@@ -71,36 +96,6 @@ async function Start_1A2B(context) {
     Ans_1A2B: answer.substring(0, answer.length - 1),
   });
   await context.sendText('好了，開始吧！');
-}
-
-async function Guess_1A2B(context) {
-  var text = context.event.text;
-  var name = context.event.message.from.firstName;
-  var A = 0
-  var B = 0;
-  text = text.split('');
-  for (var i = 0; i < 4; i++) {
-    var ans = context.state.Ans_1A2B.split(',')
-    var idx = ans.indexOf(text[i]);
-    if (idx != -1) {
-        if (idx == i)
-          A++;
-        else
-          B++;
-    }
-  }
-  if (A == 4) {
-    var userPoint =JSON.parse(context.state.Point);
-    userPoint[name] = userPoint[name] + 10
-    context.setState({
-      Ans_1A2B: 0,
-      Point: JSON.stringify(userPoint),
-    });
-    await context.sendText('勝利！');
-  }
-  else {
-    await context.sendText(A + 'A' + B + 'B');
-  }
 }
 
 function Weather(context) {
