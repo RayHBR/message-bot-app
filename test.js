@@ -7,4 +7,4 @@ var a = {
         }
     ]
 }
-console.log(JSON.parse(JSON.stringify(a)))
+console.log(JSON.parse(JSON.stringify(a)).users)

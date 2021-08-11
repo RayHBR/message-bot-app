@@ -8,7 +8,7 @@ module.exports = async function App(context) {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;
   }
-  var clientinfo = fs.readFileSync('./clientinfo/users.json', 'utf-8');
+  var clientinfo = JSON.parse(fs.readFileSync('./clientinfo/users.json', 'utf-8'));
   if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
     if (context.session.platform == 'telegram') {
       await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
@@ -36,7 +36,7 @@ module.exports = async function App(context) {
     }
   }
   else if (text.toLowerCase() == '!point') {
-    var clientinfo = checkPoint(context, clientinfo, id);
+    var clientinfo = checkPoint(clientinfo, id);
     var result = '';
     for (i = 0; i < clientinfo.users.length; i++) {
       if (id == clientinfo.users[i].userID) {
@@ -44,7 +44,7 @@ module.exports = async function App(context) {
         break;
       }
     }
-    fs.writeFileSync( './clientinfo/users.json', JSON.stringify(userPoint), 'utf-8')
+    fs.writeFileSync( './clientinfo/users.json', JSON.stringify(clientinfo), 'utf-8')
     await context.sendText(result);
   }
   else if (text == '!1A2B') {
@@ -116,15 +116,17 @@ async function Start_1A2B(context) {
 }
 
 function checkPoint(clientinfo, id) {
-  clientinfo = JSON.parse(JSON.stringify(clientinfo));
+  var newUser = true;
   for (i = 0; i < clientinfo.users.length; i++) {
-    if (id != clientinfo.users[i].userID && i == clientinfo.users.length - 1) {
-      clientinfo.users.push({
-        userID: id,
-        point: 100
-      });
+    if (id == clientinfo.users[i].userID) {
+      newUser = false;
+      break;
     }
   }
+  clientinfo.users.push({
+    userID: id,
+    point: 100
+  });
   return clientinfo;
 }
 
