@@ -116,7 +116,7 @@ async function Start_1A2B(context) {
 }
 
 function checkPoint(clientinfo, id) {
-  clientinfo = JSON.parse(clientinfo);
+  clientinfo = JSON.parse(JSON.stringify(clientinfo));
   for (i = 0; i < clientinfo.users.length; i++) {
     if (id != clientinfo.users[i].userID && i == clientinfo.users.length - 1) {
       clientinfo.users.push({
