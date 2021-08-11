@@ -12,52 +12,6 @@ module.exports = async function App(context) {
   else if (text.indexOf("星爆") != -1) {
     await context.sendDocument('https://raw.githubusercontent.com/RayHBR/message-bot-app/main/images/%E6%98%9F%E7%88%86%E8%87%89.gif');
   }
-  else if (text == '我想玩1A2B') {
-    var num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    var answer = '';
-    for (var i = 0; i < 4; i++) {
-      var idx = Math.floor(Math.random()*num.length);
-      answer += num[idx] + ',';
-      num.splice(idx, 1);
-    }
-    context.setState({
-      count: answer.substring(0, answer.length - 1),
-    });
-    await context.sendText('好了，開始吧！');
-  }
-  else if (/^[0-9]+$/.test(text) && text.length == 4 && context.state.count != 0) {
-    var A = 0
-    var B = 0;
-    text = text.split('');
-    for (var i = 0; i < 4; i++) {
-      var ans = context.state.count.split(',')
-      var idx = ans.indexOf(text[i]);
-      if (idx != -1) {
-          if (idx == i)
-            A++;
-          else
-            B++;
-      }
-    }
-    if (A == 4) {
-      context.setState({
-        count: 0,
-      });
-      await context.sendText('勝利！');
-    }
-    else {
-      await context.sendText(A + 'A' + B + 'B');
-    }
-  }
-  else if (text == '測試參數') {
-    await context.sendText(context.state.count);
-  }
-  else if (text == '明天天氣') {
-    return Weather;
-  }
-  else if (/(^\/stock [0-9][0-9][0-9][0-9])/.test(text)) {
-    return StockRealtime;
-  }
   else if (context.session.platform == 'telegram' && text == '你要被移除了RayBot') {
     if (context.event.message.from.firstName == 'Ray') {
       await context.sendText(`不要殺我嗚嗚嗚嗚`);
@@ -65,6 +19,26 @@ module.exports = async function App(context) {
     else if (context.event.message.from.firstName == 'kaiyeee') {
       await context.sendText(`就是你要殺我!!!`);
     }
+  }
+  else if (text == '!Point') {
+    var userPoint = JSON.parse(context.state.Point);
+    var result = '';
+    for (i = 0; i < Object.keys(userPoint).length; i++) {
+      result += Object.keys(userPoint)[i] + '：' + userPoint[Object.keys(userPoint)[i]] + '\r\n';
+    }
+    await context.sendText(result);
+  }
+  else if (text == '!1A2B') {
+    return Start_1A2B;
+  }
+  else if (/^[0-9]+$/.test(text) && text.length == 4 && context.state.count != 0) {
+    return Guess_1A2B;
+  }
+  else if (text == '!weather') {
+    return Weather;
+  }
+  else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
+    return StockRealtime;
   }
 }
 
@@ -83,6 +57,49 @@ async function SayHi(context) {
 async function YeReply(context) {
   var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
   await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
+}
+
+async function Start_1A2B(context) {
+  var num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  var answer = '';
+  for (var i = 0; i < 4; i++) {
+    var idx = Math.floor(Math.random()*num.length);
+    answer += num[idx] + ',';
+    num.splice(idx, 1);
+  }
+  context.setState({
+    Ans_1A2B: answer.substring(0, answer.length - 1),
+  });
+  await context.sendText('好了，開始吧！');
+}
+
+async function Guess_1A2B(context) {
+  var name = context.event.message.from.firstName;
+  var A = 0
+  var B = 0;
+  text = text.split('');
+  for (var i = 0; i < 4; i++) {
+    var ans = context.state.Ans_1A2B.split(',')
+    var idx = ans.indexOf(text[i]);
+    if (idx != -1) {
+        if (idx == i)
+          A++;
+        else
+          B++;
+    }
+  }
+  if (A == 4) {
+    var userPoint =JSON.parse(context.state.Point);
+    userPoint[name] = userPoint[name] + 10
+    context.setState({
+      Ans_1A2B: 0,
+      Point: JSON.stringify(userPoint),
+    });
+    await context.sendText('勝利！');
+  }
+  else {
+    await context.sendText(A + 'A' + B + 'B');
+  }
 }
 
 function Weather(context) {
