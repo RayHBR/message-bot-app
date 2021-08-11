@@ -47,6 +47,16 @@ module.exports = async function App(context) {
     fs.writeFileSync( './clientinfo/users.json', JSON.stringify(clientinfo), 'utf-8')
     await context.sendText(result);
   }
+  else if (text.toLowerCase() == '!plus') {
+    var clientinfo = checkPoint(clientinfo, id);
+    for (i = 0; i < clientinfo.users.length; i++) {
+      if (id == clientinfo.users[i].userID) {
+        clientinfo.users[i].point = clientinfo.users[i].point + 10;
+        break;
+      }
+    }
+    fs.writeFileSync( './clientinfo/users.json', JSON.stringify(clientinfo), 'utf-8')
+  }
   else if (text == '!1A2B') {
     return Start_1A2B;
   }
