@@ -87,10 +87,6 @@ module.exports = async function App(context) {
       await context.sendText(A + 'A' + B + 'B');
     }
   } 
-  else if (text == 'test') {
-    console.log(context.event)
-    await context.sendText(context.event);
-  }
   
   else if (text.toLowerCase() == '!weather') {
     return Weather;
