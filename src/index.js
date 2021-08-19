@@ -1,14 +1,24 @@
 const fetch = require("node-fetch");
 const fs = require('fs')
+const { Client } = require('pg');
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+client.connect();
+
+var id = 'superUser', name='superUser';
+var today = getDate();
 
 module.exports = async function App(context) {
-  var id, name;
   var text = context.event.text;
   if (context.session.platform == 'telegram') {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;
   }
-  var clientinfo = JSON.parse(fs.readFileSync('./clientinfo/users.json', 'utf-8'));
+  
   if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
     if (context.session.platform == 'telegram') {
       await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
@@ -20,13 +30,16 @@ module.exports = async function App(context) {
       await context.sendText(`Hi.`);
     }
   }
+
   else if (text.indexOf("楷翊") != -1) {
     var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
     await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
   }
+
   else if (text.indexOf("星爆") != -1) {
     await context.sendDocument('https://raw.githubusercontent.com/RayHBR/message-bot-app/main/images/%E6%98%9F%E7%88%86%E8%87%89.gif');
   }
+
   else if (context.session.platform == 'telegram' && text == '你要被移除了RayBot') {
     if (context.event.message.from.firstName == 'Ray') {
       await context.sendText(`不要殺我嗚嗚嗚嗚`);
@@ -35,31 +48,38 @@ module.exports = async function App(context) {
       await context.sendText(`就是你要殺我!!!`);
     }
   }
+
   else if (text.toLowerCase() == '!point') {
-    var clientinfo = checkPoint(clientinfo, id);
-    var result = '';
-    for (i = 0; i < clientinfo.users.length; i++) {
-      if (id == clientinfo.users[i].userID) {
-        result = name + ' 你現在有 ' + clientinfo.users[i].point + ' 點！';
-        break;
+    select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
+    client.query(select_sql, async (err, res) => {
+      if (err) await context.sendText(err);
+      else {
+        if (res.rows.length == 0) {
+          insertUser(context, 0)
+          await context.sendText(name + ' 你現在有 100 點！');
+        }
+        else {
+          await context.sendText(name + ' 你現在有 ' + res.rows[0].point + ' 點！');
+        }
       }
-    }
-    fs.writeFileSync( './clientinfo/users.json', JSON.stringify(clientinfo), 'utf-8')
-    await context.sendText(result);
+    })
   }
+
   else if (text.toLowerCase() == '!plus' && name == 'Ray') {
-    var clientinfo = checkPoint(clientinfo, id);
-    for (i = 0; i < clientinfo.users.length; i++) {
-      if (id == clientinfo.users[i].userID) {
-        clientinfo.users[i].point = clientinfo.users[i].point + 10;
-        break;
+    select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
+    client.query(select_sql, async (err, res) => {
+      if (err) await context.sendText(err);
+      else {
+          updatePoint(context, res.rows[0].point, 10)
+          await context.sendText('success!');
       }
-    }
-    fs.writeFileSync( './clientinfo/users.json', JSON.stringify(clientinfo), 'utf-8')
+    })
   }
+
   else if (text == '!1A2B') {
     return Start_1A2B;
   }
+
   else if (/^[0-9]+$/.test(text) && text.length == 4 && context.state.count != 0) {
     var A = 0
     var B = 0;
@@ -76,19 +96,23 @@ module.exports = async function App(context) {
       }
     }
     if (A == 4) {
-      var clientinfo = checkPoint(clientinfo, id);
-      for (i = 0; i < clientinfo.users.length; i++) {
-        if (id == clientinfo.users[i].userID) {
-          clientinfo.users[i].point = clientinfo.users[i].point + 10;
-          break;
+      select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
+      client.query(select_sql, async (err, res) => {
+        if (err) await context.sendText(err);
+        else {
+          context.setState({
+            Ans_1A2B: 0,
+            Count_1A2B: 0,
+          });
+          if (res.rows.length == 0) {
+            insertUser(context, 10)
+          }
+          else {
+            updatePoint(context, res.rows[0].point, 10)
+          }
+          await context.sendText( name + ' 勝利了！一共猜了' + count + '次！');
         }
-      }
-      fs.writeFileSync( './clientinfo/users.json', JSON.stringify(clientinfo), 'utf-8')
-      context.setState({
-        Ans_1A2B: 0,
-        Count_1A2B: 0,
-      });
-      await context.sendText( name + ' 勝利了！一共猜了' + count + '次！');
+      })
     }
     else {
       context.setState({
@@ -96,7 +120,13 @@ module.exports = async function App(context) {
       });
       await context.sendText(A + 'A' + B + 'B');
     }
-  } 
+  }
+
+  else if (text == '!21點'){
+    var suits = ['♠️', '♥️', '♦️', '♣️'];
+    var number = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    context.state.Blackjack
+  }
   
   else if (text.toLowerCase() == '!weather') {
     return Weather;
@@ -104,6 +134,17 @@ module.exports = async function App(context) {
 
   else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
     return StockRealtime;
+  }
+
+  else if (text == '移除' && name == 'Ray'){
+    create_sql = 'CREATE TABLE USERS(USERSEQ serial NOT NULL, USERID VARCHAR (20) NOT NULL PRIMARY KEY, USERNAME VARCHAR (20) NOT NULL, POINT NUMERIC NOT NULL, UPDATE_DATE DATE NOT NULL);'
+    drop_sql= 'DROP TABLE IF EXISTS USERS;'
+    insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('1', 'TEST', '100' ,'${today}');`
+    delete_sql = `DELETE FROM USERS WHERE USERID = 'superUser';`
+    select_sql = 'SELECT * FROM USERS'
+    client.query(delete_sql, (err, res) => {
+      if (err) throw err;
+    });
   }
 }
 
@@ -186,4 +227,39 @@ function StockRealtime(context) {
       await context.sendText(`股票代號有誤!`);
     }
   });
+}
+
+function getDate(){
+  var date = new Date();
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  var Hours = date.getHours();
+  var Minutes = date.getMinutes();
+  var Seconds = date.getSeconds();
+  if (month < 10) {
+      month = "0" + month;
+        }
+  if (day < 10) {
+       day = "0" + day;
+        }
+  return year + '-' + month + '-' + day + ' ' + Hours + ':' + Minutes + ':' + Seconds;
+}
+
+function insertUser(context, addPoint) {
+  if (context.session.platform == 'telegram') {
+    id = context.event.message.from.id;
+    name = context.event.message.from.firstName;
+  }
+  insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('${id}', '${name}', ${100 + addPoint} ,'${today}')`
+  client.query(insert_sql);
+}
+
+function updatePoint(context, Point ,addPoint) {
+  if (context.session.platform == 'telegram') {
+    id = context.event.message.from.id;
+    name = context.event.message.from.firstName;
+  }
+  update_sql = `UPDATE USERS SET POINT = ${parseInt(Point) + addPoint} WHERE USERID = '${id}'`
+  client.query(update_sql);
 }
