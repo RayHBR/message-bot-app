@@ -75,7 +75,7 @@ module.exports = async function App(context) {
     })
   }
 
-  else if (text.toLowerCase() == '!1A2B') {
+  else if (text.toLowerCase() == '!1a2b') {
     return Start_1A2B;
   }
 
