@@ -18,7 +18,7 @@ module.exports = async function App(context) {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;
   }
-  
+
   if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
     if (context.session.platform == 'telegram') {
       await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
@@ -71,12 +71,11 @@ module.exports = async function App(context) {
       if (err) await context.sendText(err);
       else {
           updatePoint(context, res.rows[0].point, 10)
-          await context.sendText('success!');
       }
     })
   }
 
-  else if (text == '!1A2B') {
+  else if (text.toLowerCase() == '!1A2B') {
     return Start_1A2B;
   }
 
@@ -128,7 +127,7 @@ module.exports = async function App(context) {
     context.state.Blackjack
   }
   
-  else if (text.toLowerCase() == '!weather') {
+  else if (text == '明天天氣') {
     return Weather;
   }
 
@@ -142,9 +141,6 @@ module.exports = async function App(context) {
     insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('1', 'TEST', '100' ,'${today}');`
     delete_sql = `DELETE FROM USERS WHERE USERID = 'superUser';`
     select_sql = 'SELECT * FROM USERS'
-    client.query(delete_sql, (err, res) => {
-      if (err) throw err;
-    });
   }
 }
 
@@ -160,21 +156,6 @@ async function Start_1A2B(context) {
     Ans_1A2B: answer.substring(0, answer.length - 1),
   });
   await context.sendText('好了，開始吧！');
-}
-
-function checkPoint(clientinfo, id) {
-  var newUser = true;
-  for (i = 0; i < clientinfo.users.length; i++) {
-    if (id == clientinfo.users[i].userID) {
-      newUser = false;
-      break;
-    }
-  }
-  clientinfo.users.push({
-    userID: id,
-    point: 100
-  });
-  return clientinfo;
 }
 
 function Weather(context) {
@@ -252,7 +233,9 @@ function insertUser(context, addPoint) {
     name = context.event.message.from.firstName;
   }
   insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('${id}', '${name}', ${100 + addPoint} ,'${today}')`
-  client.query(insert_sql);
+  client.query(insert_sql, (err, res) => {
+    client.end();
+  });
 }
 
 function updatePoint(context, Point ,addPoint) {
@@ -261,5 +244,7 @@ function updatePoint(context, Point ,addPoint) {
     name = context.event.message.from.firstName;
   }
   update_sql = `UPDATE USERS SET POINT = ${parseInt(Point) + addPoint} WHERE USERID = '${id}'`
-  client.query(update_sql);
+  client.query(update_sql, (err, res) => {
+    client.end();
+  });
 }
