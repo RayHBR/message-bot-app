@@ -233,9 +233,7 @@ function insertUser(context, addPoint) {
     name = context.event.message.from.firstName;
   }
   insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('${id}', '${name}', ${100 + addPoint} ,'${today}')`
-  client.query(insert_sql, (err, res) => {
-    client.end();
-  });
+  client.query(insert_sql);
 }
 
 function updatePoint(context, Point ,addPoint) {
@@ -244,7 +242,5 @@ function updatePoint(context, Point ,addPoint) {
     name = context.event.message.from.firstName;
   }
   update_sql = `UPDATE USERS SET POINT = ${parseInt(Point) + addPoint} WHERE USERID = '${id}'`
-  client.query(update_sql, (err, res) => {
-    client.end();
-  });
+  client.query(update_sql);
 }
