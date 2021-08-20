@@ -128,15 +128,24 @@ module.exports = async function App(context) {
     }
   }
 
-  else if (text == '!21點'){
+  else if (text == '!21'){
     await context.sendChatAction('typing');
     var suits = ['♠️', '♥️', '♦️', '♣️'];
-    var number = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-    context.state.Blackjack
+    var number = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    var poker = []
+    for (i = 0; i < suits.length; i++) {
+      for (j = 0; j < number.length; j++) {
+        poker.push(suits[i] + number[j])
+      }
+    }
+    var idx = Math.floor(Math.random()*poker.length);
+    answer = poker[idx] + ',';
+    poker.splice(idx, 1);
+    await context.sendText(answer);
+    //context.state.Blackjack
   }
   
   else if (text == '明天天氣') {
-    await context.sendChatAction('typing');
     return Weather;
   }
 
@@ -188,7 +197,9 @@ function Weather(context) {
       var MinT = results.weatherElement[2].time[0].parameter.parameterName;
       var CI = results.weatherElement[3].time[0].parameter.parameterName;
       var MaxT = results.weatherElement[4].time[0].parameter.parameterName;
+      await context.sendChatAction('typing');
       await context.sendText(`${year}/${month}/${day} 天氣預報`);
+      await context.sendChatAction('typing');
       await context.sendText(`${Wx} 最低溫度：${MinT} 最高溫度：${MaxT} 降雨機率：${PoP}% ${CI}`);
   });
 }
