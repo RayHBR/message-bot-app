@@ -149,9 +149,9 @@ module.exports = async function App(context) {
     select_sql = 'SELECT * FROM USERS'
   }
 
-  else if (context.state.Status_Blackjack) {
-    var Status_Blackjack = context.state.Status_Blackjack;
-    if (text.toLowerCase() == '!join' && Status_Blackjack == 'start_Blackjack') {
+  else if (context.state.State_Blackjack) {
+    var State_Blackjack = context.state.State_Blackjack;
+    if (text.toLowerCase() == '!join' && State_Blackjack == 'start_Blackjack') {
       await context.sendChatAction('typing');
       var USERS_Blackjack = context.state.USERS_Blackjack;
       for (i = 0; i < USERS_Blackjack.length; i++) {
@@ -175,14 +175,16 @@ module.exports = async function App(context) {
         }
       }
     }
-    else if (text.toLowerCase() == '!start' && Status_Blackjack == 'start_Blackjack') {
+    else if (text.toLowerCase() == '!start' && State_Blackjack == 'start_Blackjack') {
       await context.sendChatAction('typing');
       Start_Blackjack(context)
     }
-    else if (text.toLowerCase() == '!抽' && Status_Blackjack == 'play_Blackjack') {
+    else if (text == '!抽' && State_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       await context.sendChatAction('typing');
       for (i = 0; i < USERS_Blackjack.length; i++) {
+        console.log(USERS_Blackjack[i].id)
+        console.log(id)
         if (USERS_Blackjack[i].id == id) {
           if (USERS_Blackjack[i].state == 'start') {
             var point = USERS_Blackjack[i].point;
@@ -236,7 +238,7 @@ module.exports = async function App(context) {
         }
       }
     }
-    else if (text.toLowerCase() == '!不抽' && Status_Blackjack == 'play_Blackjack') {
+    else if (text == '!不抽' && State_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       await context.sendChatAction('typing');
       for (i = 0; i < USERS_Blackjack.length; i++) {
@@ -267,10 +269,10 @@ module.exports = async function App(context) {
     else if (text.toLowerCase() == '!end') {
       End_Blackjack(context)
     }
-    else if (text.toLowerCase() == '!強制結束') {
+    else if (text == '!強制結束') {
       context.setState({
         Poker_Blackjack: [],
-        Status_Blackjack: false,
+        State_Blackjack: false,
         USERS_Blackjack:[]
       });
       await context.sendChatAction('typing');
@@ -294,7 +296,7 @@ async function Start_1A2B(context) {
 }
 
 async function Start_Poker(context, game) {
-  if (!context.state.Status_Blackjack) {
+  if (!context.state.State_Blackjack) {
     var suits = ['♠️', '♥️', '♦️', '♣️'];
     var number = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
     var poker = [];
@@ -306,7 +308,7 @@ async function Start_Poker(context, game) {
     if (game == "Blackjack") {
       context.setState({
         Poker_Blackjack: poker,
-        Status_Blackjack: 'start_Blackjack',
+        State_Blackjack: 'start_Blackjack',
         USERS_Blackjack:[{
           id: '0', 
           name: 'Bot',
@@ -349,7 +351,7 @@ async function Start_Blackjack(context) {
       result += USERS_Blackjack[i].name + ' 抽到了' + answer + '，現在點數是 ' + point + '！\r\n';
       context.setState({
         Poker_Blackjack: poker,
-        Status_Blackjack: 'play_Blackjack',
+        State_Blackjack: 'play_Blackjack',
         USERS_Blackjack: USERS_Blackjack
       });
     }
@@ -393,7 +395,7 @@ async function End_Blackjack(context) {
       }
       context.setState({
         Poker_Blackjack: [],
-        Status_Blackjack: false,
+        State_Blackjack: false,
         USERS_Blackjack:[]
       });
       await context.sendChatAction('typing');

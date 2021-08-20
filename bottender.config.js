@@ -21,7 +21,7 @@ module.exports = {
     },
   },
   initialState: {Count_1A2B: 0, Ans_1A2B: 0,
-     Poker_Blackjack: [], Status_Blackjack: false, USERS_Blackjack: []},
+     Poker_Blackjack: [], State_Blackjack: false, USERS_Blackjack: []},
   channels: {
     messenger: {
       enabled: false,
