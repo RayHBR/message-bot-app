@@ -14,6 +14,7 @@ var today = getDate();
 
 module.exports = async function App(context) {
   var text = context.event.text;
+  await context.sendChatAction('typing');
   if (context.session.platform == 'telegram') {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;
