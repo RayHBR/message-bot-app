@@ -151,6 +151,7 @@ module.exports = async function App(context) {
 
   else if (context.state.State_Blackjack) {
     var State_Blackjack = context.state.State_Blackjack;
+    await context.sendText(State_Blackjack)
     if (text.toLowerCase() == '!join' && State_Blackjack == 'start_Blackjack') {
       await context.sendChatAction('typing');
       var USERS_Blackjack = context.state.USERS_Blackjack;
@@ -182,9 +183,9 @@ module.exports = async function App(context) {
     else if (text == '!抽' && State_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       await context.sendChatAction('typing');
-      await context.sendChatAction(id)
+      await context.sendText(id)
       for (i = 0; i < USERS_Blackjack.length; i++) {
-        await context.sendChatAction(USERS_Blackjack[i].id)
+        await context.sendText(USERS_Blackjack[i].id)
         if (USERS_Blackjack[i].id == id) {
           if (USERS_Blackjack[i].state == 'start') {
             var point = USERS_Blackjack[i].point;
