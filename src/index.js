@@ -182,9 +182,9 @@ module.exports = async function App(context) {
     else if (text == '!抽' && State_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       await context.sendChatAction('typing');
+      await context.sendChatAction(id)
       for (i = 0; i < USERS_Blackjack.length; i++) {
-        console.log(USERS_Blackjack[i].id)
-        console.log(id)
+        await context.sendChatAction(USERS_Blackjack[i].id)
         if (USERS_Blackjack[i].id == id) {
           if (USERS_Blackjack[i].state == 'start') {
             var point = USERS_Blackjack[i].point;
