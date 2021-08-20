@@ -150,8 +150,7 @@ module.exports = async function App(context) {
   }
 
   else if (context.state.State_Blackjack) {
-    var State_Blackjack = context.state.State_Blackjack;
-    if (text.toLowerCase() == '!join' && State_Blackjack == 'start_Blackjack') {
+    if (text.toLowerCase() == '!join' && context.state.State_Blackjack == 'start_Blackjack') {
       await context.sendChatAction('typing');
       var USERS_Blackjack = context.state.USERS_Blackjack;
       for (i = 0; i < USERS_Blackjack.length; i++) {
@@ -175,11 +174,11 @@ module.exports = async function App(context) {
         }
       }
     }
-    else if (text.toLowerCase() == '!start' && State_Blackjack == 'start_Blackjack') {
+    else if (text.toLowerCase() == '!start' && context.state.State_Blackjack == 'start_Blackjack') {
       await context.sendChatAction('typing');
       Start_Blackjack(context)
     }
-    else if (text == '!抽' && State_Blackjack == 'play_Blackjack') {
+    else if (text == '!抽' && context.state.State_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       await context.sendChatAction('typing');
       await context.sendText(id)
@@ -238,7 +237,7 @@ module.exports = async function App(context) {
         }
       }
     }
-    else if (text == '!不抽' && State_Blackjack == 'play_Blackjack') {
+    else if (text == '!不抽' && context.state.State_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       await context.sendChatAction('typing');
       for (i = 0; i < USERS_Blackjack.length; i++) {
@@ -357,7 +356,6 @@ async function Start_Blackjack(context) {
     context.setState({
       State_Blackjack: 'play_Blackjack'
     });
-    await context.sendText(context.state.State_Blackjack);
     await context.sendChatAction('typing');
     await context.sendText(result);
   }
@@ -378,6 +376,7 @@ async function End_Blackjack(context) {
       winner.push(USERS_Blackjack[i]);
     }
     if (USERS_Blackjack[i].state == 'start') {
+      console.log(JSON.stringify(USERS_Blackjack[i]))
       var point = USERS_Blackjack[i].point;
       await context.sendText(USERS_Blackjack[i].name + ' 還沒結束，現在點數是 ' + point + '，還要繼續抽嗎？');
       break;
