@@ -172,10 +172,10 @@ module.exports = async function App(context) {
         }
       }
     }
-    else if (text.toLowerCase() == '!start' && Status_Blackjack == 'join') {
+    else if (text.toLowerCase() == '!start' && Status_Blackjack == 'start_Blackjack') {
       Start_Blackjack(context)
     }
-    else if (text.toLowerCase() == '!抽' && Status_Blackjack == 'start') {
+    else if (text.toLowerCase() == '!抽' && Status_Blackjack == 'join_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       for (i = 0; i < USERS_Blackjack.length; i++) {
         if (USERS_Blackjack[i].id == id) {
@@ -245,7 +245,7 @@ async function Start_Poker(context, game) {
         USERS_Blackjack:[{
           user: '0', 
           name: 'Bot',
-          state: 'start', 
+          state: 'start_Blackjack', 
           pokers: [],
           point: 0
         }]
@@ -283,7 +283,7 @@ async function Start_Blackjack(context) {
       result += USERS_Blackjack[i].name + ' 抽到了' + answer + '，現在點數是 ' + point + '！\r\n';
       context.setState({
         Poker_Blackjack: poker,
-        Status_Blackjack: 'start',
+        Status_Blackjack: 'join_Blackjack',
         USERS_Blackjack: USERS_Blackjack
       });
     }
