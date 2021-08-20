@@ -151,7 +151,6 @@ module.exports = async function App(context) {
 
   else if (context.state.Status_Blackjack) {
     var Status_Blackjack = context.state.Status_Blackjack;
-    console.log(Status_Blackjack)
     if (text.toLowerCase() == '!join' && Status_Blackjack == 'start_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       for (i = 0; i < USERS_Blackjack.length; i++) {
@@ -161,7 +160,7 @@ module.exports = async function App(context) {
         }
         else if (i == USERS_Blackjack.length - 1) {
           USERS_Blackjack.push({
-            user: id,
+            id: id,
             name: name,
             state: 'start', 
             pokers: [],
@@ -188,12 +187,12 @@ module.exports = async function App(context) {
           answer = poker[idx];
           poker.splice(idx, 1);
           USERS_Blackjack[i].pokers.push(answer)
-          if (answer == 'A')
+          if (/(A)/.test(answer.substr(2,2)))
             point += 11;
-          else if (/(10|J|Q|K)/.test(answer.substr(1,2)))
+          else if (/(10|J|Q|K)/.test(answer.substr(2,2)))
             point += 10;
           else
-            point += parseInt(answer.substr(1,2));
+            point += parseInt(answer.substr(2,2));
           context.setState({
             Poker_Blackjack: poker,
             USERS_Blackjack: USERS_Blackjack
@@ -246,7 +245,7 @@ async function Start_Poker(context, game) {
         Poker_Blackjack: poker,
         Status_Blackjack: 'start_Blackjack',
         USERS_Blackjack:[{
-          user: '0', 
+          id: '0', 
           name: 'Bot',
           state: 'start', 
           pokers: [],
@@ -271,17 +270,16 @@ async function Start_Blackjack(context) {
     await context.sendText("21點開始！");
     for (i = 0; i < USERS_Blackjack.length; i++) {
       var point = USERS_Blackjack[i].point;
-      console.log(point)
       var poker = context.state.Poker_Blackjack;
       var idx = Math.floor(Math.random()*poker.length);
       answer = poker[idx];
       poker.splice(idx, 1);
-      if (answer == 'A')
+      if (/(A)/.test(answer.substr(2,2)))
         point += 11;
-      else if (/(10|J|Q|K)/.test(answer.substr(1,2)))
+      else if (/(10|J|Q|K)/.test(answer.substr(2,2)))
         point += 10;
       else {
-        point += parseInt(answer.substr(1,2));
+        point += parseInt(answer.substr(2,2));
       }
       USERS_Blackjack[i].pokers.push(answer)
       USERS_Blackjack[i].point = point;
