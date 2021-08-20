@@ -256,7 +256,12 @@ module.exports = async function App(context) {
             if (point > 21) {
               USERS_Blackjack[i].point = point;
               USERS_Blackjack[i].state = 'boom';
+              context.setState({
+                Poker_Blackjack: poker,
+                USERS_Blackjack: USERS_Blackjack
+              });
               await context.sendText(USERS_Blackjack[i].name + ' 抽到了' + answer + '，現在點數是 ' + point + '，你爆炸啦！');
+              break;
             }
             else {
               USERS_Blackjack[i].point = point;
@@ -336,13 +341,15 @@ module.exports = async function App(context) {
       await context.sendChatAction('typing');
       for (i = 0; i < USERS_Blackjack.length; i++) {
         if (USERS_Blackjack[i].id == id) {
-          var point = USERS_Blackjack[i].point;
-          USERS_Blackjack[i].state = 'skip';
-          context.setState({
-            USERS_Blackjack: USERS_Blackjack
-          });
-          await context.sendText(USERS_Blackjack[i].name + ' 現在的點數是 ' + point + '！');
-          break;
+          if (USERS_Blackjack[i].state == 'start') {
+            var point = USERS_Blackjack[i].point;
+            USERS_Blackjack[i].state = 'skip';
+            context.setState({
+              USERS_Blackjack: USERS_Blackjack
+            });
+            await context.sendText(USERS_Blackjack[i].name + ' 現在的點數是 ' + point + '！');
+            break;
+          }
         }
         else if (i == USERS_Blackjack.length - 1) {
           await context.sendText(name + ' 你沒有加入遊戲！');
