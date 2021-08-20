@@ -235,7 +235,7 @@ module.exports = async function App(context) {
         await context.sendText(result);
       }
     }
-    else if (text == '!抽' && context.state.State_Blackjack == 'play_Blackjack') {
+    else if (text == '!抽'  && context.state.State_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       await context.sendChatAction('typing');
       for (i = 0; i < USERS_Blackjack.length; i++) {
