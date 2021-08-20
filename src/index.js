@@ -129,22 +129,9 @@ module.exports = async function App(context) {
   }
 
   else if (text == '!21'){
-    await context.sendChatAction('typing');
-    var suits = ['♠️', '♥️', '♦️', '♣️'];
-    var number = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-    var poker = []
-    for (i = 0; i < suits.length; i++) {
-      for (j = 0; j < number.length; j++) {
-        poker.push(suits[i] + number[j])
-      }
-    }
-    var idx = Math.floor(Math.random()*poker.length);
-    answer = poker[idx] + ',';
-    poker.splice(idx, 1);
-    await context.sendText(answer);
-    //context.state.Blackjack
+    Start_Poker(context, 'Blackjack');
   }
-  
+
   else if (text == '明天天氣') {
     return Weather;
   }
@@ -161,6 +148,35 @@ module.exports = async function App(context) {
     delete_sql = `DELETE FROM USERS WHERE USERID = 'superUser';`
     select_sql = 'SELECT * FROM USERS'
   }
+
+  else if (context.state.Status_Blackjack) {
+    if (text.toLowerCase() == '!join') {
+      var USERS_Blackjack = context.state.USERS_Blackjack;
+      USERS_Blackjack.push({
+        user: id,
+        name: name,
+        state: 'start', 
+        pokers: []
+      })
+      context.setState({
+        USERS_Blackjack: USERS_Blackjack,
+      });
+      await context.sendText(name + " 歡迎您加入21點！");
+    }
+    else if (text.toLowerCase() == '!start') {
+      Start_Blackjack(context)
+    }
+    else if (text.toLowerCase() == 'y') {
+    }
+    else if (text.toLowerCase() == '!end') {
+      context.setState({
+        Poker_Blackjack: [],
+        Status_Blackjack: false,
+        USERS_Blackjack:[]
+      });
+      await context.sendText("感謝遊玩21點！");
+    }
+  }
 }
 
 async function Start_1A2B(context) {
@@ -175,6 +191,52 @@ async function Start_1A2B(context) {
     Ans_1A2B: answer.substring(0, answer.length - 1),
   });
   await context.sendText('好了，開始吧！');
+}
+
+async function Start_Poker(context, game) {
+  if (!context.state.Status_Blackjack) {
+    var suits = ['♠️', '♥️', '♦️', '♣️'];
+    var number = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    var poker = [];
+    for (i = 0; i < suits.length; i++) {
+      for (j = 0; j < number.length; j++) {
+        poker.push(suits[i] + number[j]);
+      }
+    }
+    if (game == "Blackjack") {
+      context.setState({
+        Poker_Blackjack: poker,
+        Status_Blackjack: true,
+        USERS_Blackjack:[{
+          user: '0', 
+          name: 'Bot',
+          state: 'start', 
+          pokers: []
+        }]
+      });
+    }
+    await context.sendText('好了，開始吧！');
+  }
+  else {
+    await context.sendText('遊戲已經開始囉！');
+  }
+}
+
+async function Start_Blackjack(context) {
+  var USERS_Blackjack = context.state.USERS_Blackjack;
+  await context.sendText("21點開始！");
+  for (i = 0; i < USERS_Blackjack.length; i++) {
+    var poker = context.state.Poker_Blackjack;
+    var idx = Math.floor(Math.random()*poker.length);
+    answer = poker[idx];
+    poker.splice(idx, 1);
+    USERS_Blackjack[i].pokers.push(answer)
+    await context.sendText(USERS_Blackjack[i].name + ' 你抽到了' + answer + '\r\n');
+    context.setState({
+      Poker_Blackjack: poker,
+      USERS_Blackjack: USERS_Blackjack
+    });
+  }
 }
 
 function Weather(context) {
