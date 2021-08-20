@@ -14,13 +14,13 @@ var today = getDate();
 
 module.exports = async function App(context) {
   var text = context.event.text;
-  await context.sendChatAction('typing');
   if (context.session.platform == 'telegram') {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;
   }
 
   if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
+    await context.sendChatAction('typing');
     if (context.session.platform == 'telegram') {
       await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
     }
@@ -33,11 +33,13 @@ module.exports = async function App(context) {
   }
 
   else if (text.indexOf("楷翊") != -1) {
+    await context.sendChatAction('typing');
     var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
     await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
   }
 
   else if (text.indexOf("星爆") != -1) {
+    await context.sendChatAction('typing');
     await context.sendDocument('https://raw.githubusercontent.com/RayHBR/message-bot-app/main/images/%E6%98%9F%E7%88%86%E8%87%89.gif');
   }
 
@@ -51,6 +53,7 @@ module.exports = async function App(context) {
   }
 
   else if (text.toLowerCase() == '!point') {
+    await context.sendChatAction('typing');
     select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
     client.query(select_sql, async (err, res) => {
       if (err) await context.sendText(err);
@@ -67,6 +70,7 @@ module.exports = async function App(context) {
   }
 
   else if (text.toLowerCase() == '!plus' && name == 'Ray') {
+    await context.sendChatAction('typing');
     select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
     client.query(select_sql, async (err, res) => {
       if (err) await context.sendText(err);
@@ -77,10 +81,12 @@ module.exports = async function App(context) {
   }
 
   else if (text.toLowerCase() == '!1a2b') {
+    await context.sendChatAction('typing');
     return Start_1A2B;
   }
 
   else if (/^[0-9]+$/.test(text) && text.length == 4 && context.state.count != 0) {
+    await context.sendChatAction('typing');
     var A = 0
     var B = 0;
     var count = context.state.Count_1A2B + 1;
@@ -123,16 +129,19 @@ module.exports = async function App(context) {
   }
 
   else if (text == '!21點'){
+    await context.sendChatAction('typing');
     var suits = ['♠️', '♥️', '♦️', '♣️'];
     var number = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
     context.state.Blackjack
   }
   
   else if (text == '明天天氣') {
+    await context.sendChatAction('typing');
     return Weather;
   }
 
   else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
+    await context.sendChatAction('typing');
     return StockRealtime;
   }
 
