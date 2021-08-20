@@ -151,7 +151,6 @@ module.exports = async function App(context) {
 
   else if (context.state.State_Blackjack) {
     var State_Blackjack = context.state.State_Blackjack;
-    await context.sendText(State_Blackjack)
     if (text.toLowerCase() == '!join' && State_Blackjack == 'start_Blackjack') {
       await context.sendChatAction('typing');
       var USERS_Blackjack = context.state.USERS_Blackjack;
@@ -352,10 +351,13 @@ async function Start_Blackjack(context) {
       result += USERS_Blackjack[i].name + ' 抽到了' + answer + '，現在點數是 ' + point + '！\r\n';
       context.setState({
         Poker_Blackjack: poker,
-        State_Blackjack: 'play_Blackjack',
         USERS_Blackjack: USERS_Blackjack
       });
     }
+    context.setState({
+      State_Blackjack: 'play_Blackjack'
+    });
+    await context.sendText(context.state.State_Blackjack);
     await context.sendChatAction('typing');
     await context.sendText(result);
   }
