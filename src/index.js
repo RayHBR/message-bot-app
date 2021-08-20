@@ -138,20 +138,18 @@ module.exports = async function App(context) {
           poker.push(suits[i] + number[j]);
         }
       }
-      if (game == "Blackjack") {
-        context.setState({
-          Poker_Blackjack: poker,
-          State_Blackjack: 'start_Blackjack',
-          USERS_Blackjack:[{
-            id: '0', 
-            name: 'Bot',
-            state: 'skip', 
-            pokers: [],
-            point: 0
-          }]
-        });
-        await context.sendText('好了，現在輸入 !join 加入遊戲吧，確定人數後輸入 !start 開始遊戲！');
-      }
+      context.setState({
+        Poker_Blackjack: poker,
+        State_Blackjack: 'start_Blackjack',
+        USERS_Blackjack:[{
+          id: '0', 
+          name: 'Bot',
+          state: 'skip', 
+          pokers: [],
+          point: 0
+        }]
+      });
+      await context.sendText('好了，現在輸入 !join 加入遊戲吧，確定人數後輸入 !start 開始遊戲！');
     }
     else {
       await context.sendText('遊戲已經開始囉！');
