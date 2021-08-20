@@ -150,7 +150,9 @@ module.exports = async function App(context) {
   }
 
   else if (context.state.Status_Blackjack) {
-    if (text.toLowerCase() == '!join' && Status_Blackjack == 'join') {
+    var Status_Blackjack = context.state.Status_Blackjack;
+    console.log(Status_Blackjack)
+    if (text.toLowerCase() == '!join' && Status_Blackjack == 'start_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       for (i = 0; i < USERS_Blackjack.length; i++) {
         if (USERS_Blackjack[i].id == id) {
@@ -169,13 +171,14 @@ module.exports = async function App(context) {
             USERS_Blackjack: USERS_Blackjack,
           });
           await context.sendText(name + " 歡迎您加入21點！");
+          break;
         }
       }
     }
-    else if (text.toLowerCase() == '!start' && Status_Blackjack == 'start_Blackjack') {
+    else if (text.toLowerCase() == '!start') {
       Start_Blackjack(context)
     }
-    else if (text.toLowerCase() == '!抽' && Status_Blackjack == 'join_Blackjack') {
+    else if (text.toLowerCase() == '!抽' && Status_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       for (i = 0; i < USERS_Blackjack.length; i++) {
         if (USERS_Blackjack[i].id == id) {
@@ -241,11 +244,11 @@ async function Start_Poker(context, game) {
     if (game == "Blackjack") {
       context.setState({
         Poker_Blackjack: poker,
-        Status_Blackjack: 'join',
+        Status_Blackjack: 'start_Blackjack',
         USERS_Blackjack:[{
           user: '0', 
           name: 'Bot',
-          state: 'start_Blackjack', 
+          state: 'start', 
           pokers: [],
           point: 0
         }]
@@ -268,6 +271,7 @@ async function Start_Blackjack(context) {
     await context.sendText("21點開始！");
     for (i = 0; i < USERS_Blackjack.length; i++) {
       var point = USERS_Blackjack[i].point;
+      console.log(point)
       var poker = context.state.Poker_Blackjack;
       var idx = Math.floor(Math.random()*poker.length);
       answer = poker[idx];
@@ -276,14 +280,15 @@ async function Start_Blackjack(context) {
         point += 11;
       else if (/(10|J|Q|K)/.test(answer.substr(1,2)))
         point += 10;
-      else
+      else {
         point += parseInt(answer.substr(1,2));
+      }
       USERS_Blackjack[i].pokers.push(answer)
       USERS_Blackjack[i].point = point;
       result += USERS_Blackjack[i].name + ' 抽到了' + answer + '，現在點數是 ' + point + '！\r\n';
       context.setState({
         Poker_Blackjack: poker,
-        Status_Blackjack: 'join_Blackjack',
+        Status_Blackjack: 'play_Blackjack',
         USERS_Blackjack: USERS_Blackjack
       });
     }
