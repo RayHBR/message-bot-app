@@ -174,6 +174,9 @@ module.exports = async function App(context) {
   }
 
   else if (context.state.State_Blackjack) {
+    var winner = [];
+    var winner_point = 0;
+    var check_end = false;
     if (text.toLowerCase() == '!join' && context.state.State_Blackjack == 'start_Blackjack') {
       await context.sendChatAction('typing');
       var USERS_Blackjack = context.state.USERS_Blackjack;
@@ -206,7 +209,7 @@ module.exports = async function App(context) {
         await context.sendText("還沒有人加入遊戲QQ");
       }
       else {
-        await context.sendText("21點開始！輸入 !抽 可以抽牌，輸入 !不抽 代表結束歐！");
+        await context.sendText("21點開始，輸入 !抽 可以抽牌，輸入 !不抽 代表結束歐！");
         for (i = 0; i < USERS_Blackjack.length; i++) {
           var point = USERS_Blackjack[i].point;
           var poker = context.state.Poker_Blackjack;
@@ -288,50 +291,70 @@ module.exports = async function App(context) {
       }
       for (i = 0; i < USERS_Blackjack.length; i++) {
         if (USERS_Blackjack[i].state == 'start') {
-          continue;
+          break;
         }
         else if (i == USERS_Blackjack.length - 1) {
-          await context.sendChatAction('typing');
-          await context.sendText('所有人都結束了！');
-          var USERS_Blackjack = context.state.USERS_Blackjack;
-          var winner = [];
-          var winner_point = 0;
-          for (i = 0; i < USERS_Blackjack.length; i++) {
-            if (USERS_Blackjack[i].point <= 21 && USERS_Blackjack[i].point > winner_point) {
-              winner_point = USERS_Blackjack[i].point;
-              winner = [];
-              winner.push(USERS_Blackjack[i]);
+          check_end = true;
+        }
+      }
+      if (check_end) {
+        while (USERS_Blackjack[0].point <= 21) {
+          var point;
+          var poker = context.state.Poker_Blackjack;
+          var idx = Math.floor(Math.random()*poker.length);
+          answer = poker[idx];
+          console.log(answer)
+          if (/(A)/.test(answer.substr(2,2)))
+            point = 11;
+          else if (/(10|J|Q|K)/.test(answer.substr(2,2)))
+            point = 10;
+          else
+            point = parseInt(answer.substr(2,2))
+          if (point + USERS_Blackjack[0].point <= 21){
+            USERS_Blackjack[0].point += point; 
+            await context.sendChatAction('typing');
+            await context.sendText('元智幼稚園抽到了' + answer + '，現在點數是 ' + USERS_Blackjack[0].point + '！');
+            USERS_Blackjack[0].pokers.push(answer)
+            poker.splice(idx, 1);
+          }
+          else {
+            await context.sendText('元智幼稚園不抽啦！');
+            break;
+          }
+        }
+        for (i = 0; i < USERS_Blackjack.length; i++) {
+          if (USERS_Blackjack[i].point <= 21 && USERS_Blackjack[i].point > winner_point) {
+            winner_point = USERS_Blackjack[i].point;
+            winner = [];
+            winner.push(USERS_Blackjack[i]);
+          }
+          else if (USERS_Blackjack[i].point <= 21 && USERS_Blackjack[i].point == winner_point) {
+            winner.push(USERS_Blackjack[i]);
+          }
+          if (i == USERS_Blackjack.length - 1) {
+            await context.sendChatAction('typing');
+            await context.sendText('所有人都結束了！');
+            await context.sendChatAction('typing');
+            if (winner_point == 0) {
+              await context.sendText('無人獲勝...')
             }
-            else if (USERS_Blackjack[i].point <= 21 && USERS_Blackjack[i].point == winner_point) {
-              winner.push(USERS_Blackjack[i]);
+            else if (winner.length == 1) {
+              await context.sendText('恭喜 ' + winner[0].name + ' 獲勝，點數為 ' + winner[0].point + '！');
             }
-            if (USERS_Blackjack[i].state == 'start') {
-              var point = USERS_Blackjack[i].point;
-              await context.sendText(USERS_Blackjack[i].name + ' 還沒結束，現在點數是 ' + point + '，還要繼續抽嗎？');
-              break;
-            }
-            else if (i == USERS_Blackjack.length - 1) {
-              if (winner_point == 0) {
-                await context.sendText('無人獲勝...')
+            else if (winner.length > 1) {
+              var winner_name = '';
+              for (j = 0; j < winner.length; j++) {
+                winner_name += winner[j].name + ', ';
               }
-              else if (winner.length == 1) {
-                await context.sendText('恭喜 ' + winner[0].name + ' 獲勝，點數為 ' + winner[0].point + '！');
-              }
-              else if (winner.length > 1) {
-                var winner_name = '';
-                for (j = 0; j < winner.length; j++) {
-                  winner_name += winner[j].name + ', ';
-                }
-                await context.sendText('恭喜 ' + winner_name.substr(0, winner_name.length - 2) + ' 平手，點數為 ' + winner[0].point + '！');
-              }
-              context.setState({
-                Poker_Blackjack: [],
-                State_Blackjack: false,
-                USERS_Blackjack:[]
-              });
-              await context.sendChatAction('typing');
-              await context.sendText("感謝大家遊玩21點！");
+              await context.sendText('恭喜 ' + winner_name.substr(0, winner_name.length - 2) + ' 平手，點數為 ' + winner[0].point + '！');
             }
+            context.setState({
+              Poker_Blackjack: [],
+              State_Blackjack: false,
+              USERS_Blackjack:[]
+            });
+            await context.sendChatAction('typing');
+            await context.sendText("感謝大家遊玩21點！");
           }
         }
       }
@@ -357,95 +380,71 @@ module.exports = async function App(context) {
       }
       for (i = 0; i < USERS_Blackjack.length; i++) {
         if (USERS_Blackjack[i].state == 'start') {
-          continue;
-        }
-        else if (i == USERS_Blackjack.length - 1) {
-          await context.sendChatAction('typing');
-          await context.sendText('所有人都結束了！');
-          await context.sendChatAction('typing');
-          var USERS_Blackjack = context.state.USERS_Blackjack;
-          var winner = [];
-          var winner_point = 0;
-          for (i = 0; i < USERS_Blackjack.length; i++) {
-            if (USERS_Blackjack[i].point <= 21 && USERS_Blackjack[i].point > winner_point) {
-              winner_point = USERS_Blackjack[i].point;
-              winner = [];
-              winner.push(USERS_Blackjack[i]);
-            }
-            else if (USERS_Blackjack[i].point <= 21 && USERS_Blackjack[i].point == winner_point) {
-              winner.push(USERS_Blackjack[i]);
-            }
-            if (USERS_Blackjack[i].state == 'start') {
-              var point = USERS_Blackjack[i].point;
-              await context.sendText(USERS_Blackjack[i].name + ' 還沒結束，現在點數是 ' + point + '，還要繼續抽嗎？');
-              break;
-            }
-            else if (i == USERS_Blackjack.length - 1) {
-              if (winner_point == 0) {
-                await context.sendText('無人獲勝...')
-              }
-              else if (winner.length == 1) {
-                await context.sendText('恭喜 ' + winner[0].name + ' 獲勝，點數為 ' + winner[0].point + '！');
-              }
-              else if (winner.length > 1) {
-                var winner_name = '';
-                for (j = 0; j < winner.length; j++) {
-                  winner_name += winner[j].name + ', ';
-                }
-                await context.sendText('恭喜 ' + winner_name.substr(0, winner_name.length - 2) + ' 平手，點數為 ' + winner[0].point + '！');
-              }
-              context.setState({
-                Poker_Blackjack: [],
-                State_Blackjack: false,
-                USERS_Blackjack:[]
-              });
-              await context.sendChatAction('typing');
-              await context.sendText("感謝大家遊玩21點！");
-            }
-          }
-        }
-      }
-    }
-    else if (text.toLowerCase() == '!end') {
-      await context.sendChatAction('typing');
-      var USERS_Blackjack = context.state.USERS_Blackjack;
-      var winner = [];
-      var winner_point = 0;
-      for (i = 0; i < USERS_Blackjack.length; i++) {
-        if (USERS_Blackjack[i].point <= 21 && USERS_Blackjack[i].point > winner_point) {
-          winner_point = USERS_Blackjack[i].point;
-          winner = [];
-          winner.push(USERS_Blackjack[i]);
-        }
-        else if (USERS_Blackjack[i].point <= 21 && USERS_Blackjack[i].point == winner_point) {
-          winner.push(USERS_Blackjack[i]);
-        }
-        if (USERS_Blackjack[i].state == 'start') {
-          var point = USERS_Blackjack[i].point;
-          await context.sendText(USERS_Blackjack[i].name + ' 還沒結束，現在點數是 ' + point + '，還要繼續抽嗎？');
           break;
         }
         else if (i == USERS_Blackjack.length - 1) {
-          if (winner_point == 0) {
-            await context.sendText('無人獲勝...')
+          check_end = true;
+        }
+      }
+      if (check_end) {
+        while (USERS_Blackjack[0].point <= 21) {
+          var point;
+          var poker = context.state.Poker_Blackjack;
+          var idx = Math.floor(Math.random()*poker.length);
+          answer = poker[idx];
+          console.log(answer)
+          if (/(A)/.test(answer.substr(2,2)))
+            point = 11;
+          else if (/(10|J|Q|K)/.test(answer.substr(2,2)))
+            point = 10;
+          else
+            point = parseInt(answer.substr(2,2))
+          if (point + USERS_Blackjack[0].point <= 21){
+            USERS_Blackjack[0].point += point; 
+            await context.sendChatAction('typing');
+            await context.sendText('元智幼稚園抽到了' + answer + '，現在點數是 ' + USERS_Blackjack[0].point + '！');
+            USERS_Blackjack[0].pokers.push(answer)
+            poker.splice(idx, 1);
           }
-          else if (winner.length == 1) {
-            await context.sendText('恭喜 ' + winner[0].name + ' 獲勝，點數為 ' + winner[0].point + '！');
+          else {
+            await context.sendText('元智幼稚園不抽啦！');
+            break;
           }
-          else if (winner.length > 1) {
-            var winner_name = '';
-            for (j = 0; j < winner.length; j++) {
-              winner_name += winner[j].name + ', ';
+        }
+        for (i = 0; i < USERS_Blackjack.length; i++) {
+          if (USERS_Blackjack[i].point <= 21 && USERS_Blackjack[i].point > winner_point) {
+            winner_point = USERS_Blackjack[i].point;
+            winner = [];
+            winner.push(USERS_Blackjack[i]);
+          }
+          else if (USERS_Blackjack[i].point <= 21 && USERS_Blackjack[i].point == winner_point) {
+            winner.push(USERS_Blackjack[i]);
+          }
+          if (i == USERS_Blackjack.length - 1) {
+            await context.sendChatAction('typing');
+            await context.sendText('所有人都結束了！');
+            await context.sendChatAction('typing');
+            if (winner_point == 0) {
+              await context.sendText('無人獲勝...')
             }
-            await context.sendText('恭喜 ' + winner_name.substr(0, winner_name.length - 2) + ' 平手，點數為 ' + winner[0].point + '！');
+            else if (winner.length == 1) {
+              await context.sendText('恭喜 ' + winner[0].name + ' 獲勝，點數為 ' + winner[0].point + '！');
+            }
+            else if (winner.length > 1) {
+              var winner_name = '';
+              for (j = 0; j < winner.length; j++) {
+                winner_name += winner[j].name + ', ';
+              }
+              await context.sendText('恭喜 ' + winner_name.substr(0, winner_name.length - 2) + ' 平手，點數為 ' + winner[0].point + '！');
+            }
+            context.setState({
+              Poker_Blackjack: [],
+              State_Blackjack: false,
+              USERS_Blackjack:[]
+            });
+            await context.sendChatAction('typing');
+            await context.sendText("感謝大家遊玩21點！");
           }
-          context.setState({
-            Poker_Blackjack: [],
-            State_Blackjack: false,
-            USERS_Blackjack:[]
-          });
-          await context.sendChatAction('typing');
-          await context.sendText("感謝大家遊玩21點！");
         }
       }
     }
