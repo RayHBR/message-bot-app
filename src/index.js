@@ -342,6 +342,24 @@ module.exports = async function App(context) {
         End_Blackjack(context, USERS_Blackjack, poker)
       }
     }
+    else if (text == '!手牌'  && context.state.State_Blackjack == 'play_Blackjack') {
+      var USERS_Blackjack = context.state.USERS_Blackjack;
+      var result = '';
+      await context.sendChatAction('typing');
+      for (i = 0; i < USERS_Blackjack.length; i++) {
+        if (USERS_Blackjack[i].id == id) {
+            var pokers = USERS_Blackjack[i].pokers;
+            for (j = 0; j < pokers.length; j++) {
+              result += pokers[j] + '、'
+            }
+            break;
+        }
+        else if (i == USERS_Blackjack.length - 1) {
+          await context.sendText(name + ' 你沒有加入遊戲！');
+        }
+      }
+      await context.sendText(result.substr(0, result.length - 1));
+    }
     else if (text == '!強制結束') {
       context.setState({
         Poker_Blackjack: [],
