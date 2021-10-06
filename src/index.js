@@ -344,7 +344,7 @@ module.exports = async function App(context) {
     }
     else if (text == '!手牌'  && context.state.State_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
-      var result = '';
+      var result = '你現在的手牌有';
       await context.sendChatAction('typing');
       for (i = 0; i < USERS_Blackjack.length; i++) {
         if (USERS_Blackjack[i].id == id) {
