@@ -37,7 +37,7 @@ module.exports = async function App(context) {
     var YeReply = Array("@kaiyeee");
     await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
   }
-  else if (text.indexOf("ㄅㄖ") != -1) {
+  else if (/^(ㄅㄖ)$/.test(text)) {
     await context.sendChatAction('typing');
     var RayReply = Array("@Ray_Huang");
     await context.sendText(RayReply[Math.floor(Math.random() * RayReply.length)]);
