@@ -32,9 +32,10 @@ module.exports = async function App(context) {
     }
   }
 
-  else if (text.indexOf("楷翊") != -1) {
+  else if (text.indexOf("楷翊") != -1 && context.event.message.from.firstName == 'Ray') {
     await context.sendChatAction('typing');
-    var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
+    //var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
+    var YeReply = Array("@kaiyeee");
     await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
   }
 
