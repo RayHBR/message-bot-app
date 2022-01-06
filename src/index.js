@@ -31,14 +31,17 @@ module.exports = async function App(context) {
       await context.sendText(`Hi.`);
     }
   }
-
   else if (text.indexOf("楷翊") != -1 && context.event.message.from.firstName == 'Ray') {
     await context.sendChatAction('typing');
     //var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
     var YeReply = Array("@kaiyeee");
     await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
   }
-
+  else if (text.indexOf("ㄅㄖ") != -1) {
+    await context.sendChatAction('typing');
+    var RayReply = Array("@Ray_Huang");
+    await context.sendText(RayReply[Math.floor(Math.random() * RayReply.length)]);
+  }
   else if (text.indexOf("星爆") != -1) {
     await context.sendChatAction('typing');
     await context.sendDocument('https://raw.githubusercontent.com/RayHBR/message-bot-app/main/images/%E6%98%9F%E7%88%86%E8%87%89.gif');
@@ -48,7 +51,7 @@ module.exports = async function App(context) {
     if (context.event.message.from.firstName == 'Ray') {
       await context.sendText(`不要殺我嗚嗚嗚嗚`);
     }
-    else if (context.event.message.from.firstName == 'Chang') {
+    else {
       await context.sendText(`就是你要殺我!!!`);
     }
   }
