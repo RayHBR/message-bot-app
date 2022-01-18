@@ -84,6 +84,8 @@ module.exports = async function App(context) {
     client.query(drop_sql);
     create_sql = 'CREATE TABLE GUESS_AB(ID VARCHAR (20) NOT NULL PRIMARY KEY, ANSWER VARCHAR (7) NOT NULL, COUNT NUMERIC NOT NULL, STATE Boolean NOT NULL);'
     client.query(create_sql);
+    var insert_sql = `INSERT INTO GUESS_AB (ID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '1234', 0, true)`
+    client.query(insert_sql)
     
   }
   else if (text.toLowerCase() == 'info2' && name == 'Ray') {
