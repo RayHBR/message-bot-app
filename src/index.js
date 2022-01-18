@@ -87,7 +87,7 @@ module.exports = async function App(context) {
     
   }
   else if (text.toLowerCase() == 'info2' && name == 'Ray') {
-    var select_sql = `SELECT * FROM GUESS_AB WHERE ID = ${chat_id}`
+    var select_sql = `SELECT * FROM GUESS_AB WHERE ID = '${chat_id}'`
     client.query(select_sql, async (err, res) => {
       if (err) await context.sendText(err);
       else {
