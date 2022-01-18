@@ -82,68 +82,59 @@ module.exports = async function App(context) {
   else if (text.toLowerCase() == 'info' && name == 'Ray') {
     drop_sql= 'DROP TABLE IF EXISTS GUESS_AB;'
     client.query(drop_sql);
-    create_sql = 'CREATE TABLE GUESS_AB(ID VARCHAR (20) NOT NULL PRIMARY KEY, ANSWER VARCHAR (7) NOT NULL, COUNT NUMERIC NOT NULL, STATE Boolean NOT NULL);'
+    create_sql = 'CREATE TABLE GUESS_AB(ID VARCHAR (20) NOT NULL PRIMARY KEY, ANSWER VARCHAR (7), COUNT NUMERIC NOT NULL, STATE Boolean NOT NULL);'
     client.query(create_sql);
-    var insert_sql = `INSERT INTO GUESS_AB (ID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '1234', 0, true)`
-    client.query(insert_sql)
-    
-  }
-  else if (text.toLowerCase() == 'info2' && name == 'Ray') {
-    var select_sql = `SELECT * FROM GUESS_AB WHERE ID = '${chat_id}'`
-    client.query(select_sql, async (err, res) => {
-      if (err) await context.sendText(err);
-      else {
-          await context.sendText(res.rows.length);
-          await context.sendText(res.rows[0]);
-      }
-    })
   }
   else if (text.toLowerCase() == '!1a2b') {
     await context.sendChatAction('typing');
     return Start_1A2B;
   }
-  /*else if (/^\d{4}$/.test(text) && context.state.count != 0) {
-    await context.sendChatAction('typing');
-    var A = 0
-    var B = 0;
-    var count = context.state.Count_1A2B + 1;
-    text = text.split('');
-    for (var i = 0; i < 4; i++) {
-      var ans = context.state.Ans_1A2B.split(',')
-      var idx = ans.indexOf(text[i]);
-      if (idx != -1) {
-          if (idx == i)
-            A++;
-          else
-            B++;
-      }
-    }
-    if (A == 4) {
-      select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
-      client.query(select_sql, async (err, res) => {
-        if (err) await context.sendText(err);
-        else {
-          context.setState({
-            Ans_1A2B: 0,
-            Count_1A2B: 0,
-          });
-          if (res.rows.length == 0) {
-            insertUser(context, 10)
+  else if (/^\d{4}$/.test(text)) {
+    var select_sql = `SELECT * FROM GUESS_AB WHERE ID = ${chat_id}`
+    client.query(select_sql, async (err, res) => {
+      if (err) await context.sendText(err);
+      else if (res.rows[0].state != false && res.rows.length != 0) {
+        var A = 0
+        var B = 0;
+        var count = res.rows[0].count + 1;
+        text = text.split('');
+        for (var i = 0; i < 4; i++) {
+          var ans = res.rows[0].answer.split(',');
+          var idx = ans.indexOf(text[i]);
+          if (idx != -1) {
+            if (idx == i)
+              A++;
+            else
+              B++;
           }
-          else {
-            updatePoint(context, res.rows[0].point, 10)
-          }
-          await context.sendText( name + ' 勝利了！一共猜了' + count + '次！');
         }
-      })
-    }
-    else {
-      context.setState({
-        Count_1A2B: count,
-      });
-      await context.sendText(A + 'A' + B + 'B');
-    }
-  }*/
+        if (A == 4) {
+          select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
+          client.query(select_sql, async (err, res) => {
+            if (err) await context.sendText(err);
+            else {
+              if (res.rows.length == 0) {
+                insertUser(context, 10)
+              }
+              else {
+                updatePoint(context, res.rows[0].point, 10)
+              }
+              await context.sendChatAction('typing');
+              var update_sql = `UPDATE GUESS_AB SET ANSWER='', COUNT=0, STATE=false WHERE ID='${chat_id}'`
+              client.query(update_sql)
+              await context.sendText(name + ' 勝利了！一共猜了' + count + '次！');
+            }
+          })
+        }
+        else {
+          await context.sendChatAction('typing');
+          var update_sql = `UPDATE GUESS_AB SET COUNT='${count}' WHERE ID='${chat_id}'`
+          client.query(update_sql)
+          await context.sendText(A + 'A' + B + 'B');
+        }
+      }
+    })
+  }
   else if (text == '!21'){
     if (!context.state.State_Blackjack) {
       var suits = ['♠️', '♥️', '♦️', '♣️'];
@@ -417,11 +408,11 @@ async function Start_1A2B(context) {
     if (err) await context.sendText(err);
     else {
       if (res.rows.length == 0) {
-        var insert_sql = `INSERT INTO GUESS_AB (ID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, 'true')`
+        var insert_sql = `INSERT INTO GUESS_AB (ID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, true)`
         client.query(insert_sql)
       }
       else {
-        var update_sql = `UPDATE GUESS_AB SET ANSWER='${answer.substring(0, answer.length - 1)}', STATE='true' WHERE ID='${chat_id}'`
+        var update_sql = `UPDATE GUESS_AB SET ANSWER='${answer.substring(0, answer.length - 1)}', STATE=true WHERE ID='${chat_id}'`
         client.query(update_sql)
       }
     }
