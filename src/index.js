@@ -19,7 +19,7 @@ module.exports = async function App(context) {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;
     chat_id = context.event.message.chat.id;
-    type = to > 0 ? "User" : "Group";
+    type = chat_id > 0 ? "User" : "Group";
   }
 
   if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
