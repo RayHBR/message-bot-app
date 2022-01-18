@@ -415,11 +415,11 @@ async function Start_1A2B(context) {
     if (err) await context.sendText(err);
     else {
       if (res.rows.length == 0) {
-        var insert_sql = `INSERT INTO GUESS_AB (ID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, True)`
+        var insert_sql = `INSERT INTO GUESS_AB (ID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, 'true')`
         client.query(insert_sql)
       }
       else {
-        var update_sql = `UPDATE GUESS_AB SET ANSWER='${answer.substring(0, answer.length - 1)}', STATE=True WHERE ID='${chat_id}'`
+        var update_sql = `UPDATE GUESS_AB SET ANSWER='${answer.substring(0, answer.length - 1)}', STATE='true' WHERE ID='${chat_id}'`
         client.query(update_sql)
       }
     }
