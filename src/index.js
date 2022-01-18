@@ -9,14 +9,17 @@ const client = new Client({
 });
 client.connect();
 
-var id = 'superUser', name='superUser';
+var id = 'superUser', name='superUser', to='superUser', type='superUser';
 var today = getDate();
 
 module.exports = async function App(context) {
   var text = context.event.text;
-  if (context.session.platform == 'telegram') {
+  var platform = context.session.platform;
+  if (platform == 'telegram') {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;
+    to = context.event.message.chat.id;
+    type = to > 0 ? "User" : "Group";
   }
 
   if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
@@ -31,32 +34,26 @@ module.exports = async function App(context) {
       await context.sendText(`Hi.`);
     }
   }
-  else if (text.indexOf("楷翊") != -1 && context.event.message.from.firstName == 'Ray') {
+  else if (text.indexOf("楷翊") != -1 && name == 'Ray') {
     await context.sendChatAction('typing');
-    //var YeReply = Array("楷yeeeeeeee", "@kaiyeee", "呼叫yee");
-    var YeReply = Array("@kaiyeee");
-    await context.sendText(YeReply[Math.floor(Math.random() * YeReply.length)]);
+    await context.sendText("@kaiyeee");
   }
   else if (/^(ㄅㄖ)$/.test(text)) {
     await context.sendChatAction('typing');
-    var RayReply = Array("@Ray_Huang");
-    await context.sendText(RayReply[Math.floor(Math.random() * RayReply.length)]);
+    await context.sendText("@Ray_Huang");
   }
   else if (text.indexOf("星爆") != -1) {
     await context.sendChatAction('typing');
     await context.sendDocument('https://raw.githubusercontent.com/RayHBR/message-bot-app/main/images/%E6%98%9F%E7%88%86%E8%87%89.gif');
   }
-
-  else if (context.session.platform == 'telegram' && text == '你要被移除了RayBot') {
-    if (context.event.message.from.firstName == 'Ray') {
-      await context.sendText(`不要殺我嗚嗚嗚嗚`);
-    }
-    else {
-      await context.sendText(`就是你要殺我!!!`);
-    }
+  else if (text == '明天天氣') {
+    return Weather;
   }
-
-  else if (text.toLowerCase() == '!point') {
+  else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
+    await context.sendChatAction('typing');
+    return StockRealtime;
+  }
+  else if (text.toLowerCase() == 'point') {
     await context.sendChatAction('typing');
     select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
     client.query(select_sql, async (err, res) => {
@@ -72,8 +69,7 @@ module.exports = async function App(context) {
       }
     })
   }
-
-  else if (text.toLowerCase() == '!plus' && name == 'Ray') {
+  else if (text.toLowerCase() == 'plus' && name == 'Ray') {
     await context.sendChatAction('typing');
     select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
     client.query(select_sql, async (err, res) => {
@@ -83,19 +79,15 @@ module.exports = async function App(context) {
       }
     })
   }
-
   else if (text.toLowerCase() == 'info' && name == 'Ray') {
-    await context.sendChatAction('typing');
-    await context.sendText(id);
-    await context.sendText(name);
+    create_sql = 'CREATE TABLE GUESS_AB(ID VARCHAR (20) NOT NULL PRIMARY KEY, ANSWER VARCHAR (4) NOT NULL, COUNT NUMERIC NOT NULL, STATE);'
+    client.query(create_sql);
   }
-
   else if (text.toLowerCase() == '!1a2b') {
     await context.sendChatAction('typing');
     return Start_1A2B;
   }
-
-  else if (/^[0-9]+$/.test(text) && text.length == 4 && context.state.count != 0) {
+  else if (/^\d{4}$/.test(text) && context.state.count != 0) {
     await context.sendChatAction('typing');
     var A = 0
     var B = 0;
@@ -137,7 +129,6 @@ module.exports = async function App(context) {
       await context.sendText(A + 'A' + B + 'B');
     }
   }
-
   else if (text == '!21'){
     if (!context.state.State_Blackjack) {
       var suits = ['♠️', '♥️', '♦️', '♣️'];
@@ -165,16 +156,6 @@ module.exports = async function App(context) {
       await context.sendText('遊戲已經開始囉！');
     }
   }
-
-  else if (text == '明天天氣') {
-    return Weather;
-  }
-
-  else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
-    await context.sendChatAction('typing');
-    return StockRealtime;
-  }
-
   else if (text == '移除' && name == 'Ray'){
     create_sql = 'CREATE TABLE USERS(USERSEQ serial NOT NULL, USERID VARCHAR (20) NOT NULL PRIMARY KEY, USERNAME VARCHAR (20) NOT NULL, POINT NUMERIC NOT NULL, UPDATE_DATE DATE NOT NULL);'
     drop_sql= 'DROP TABLE IF EXISTS USERS;'
@@ -182,7 +163,6 @@ module.exports = async function App(context) {
     delete_sql = `DELETE FROM USERS WHERE USERID = 'superUser';`
     select_sql = 'SELECT * FROM USERS'
   }
-
   else if (context.state.State_Blackjack) {
     var check_end = false;
     if (text.toLowerCase() == '!join' && context.state.State_Blackjack == 'start_Blackjack') {
@@ -382,20 +362,6 @@ module.exports = async function App(context) {
   }
 }
 
-async function Start_1A2B(context) {
-  var num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  var answer = '';
-  for (var i = 0; i < 4; i++) {
-    var idx = Math.floor(Math.random()*num.length);
-    answer += num[idx] + ',';
-    num.splice(idx, 1);
-  }
-  context.setState({
-    Ans_1A2B: answer.substring(0, answer.length - 1),
-  });
-  await context.sendText('好了，開始吧！');
-}
-
 function Weather(context) {
   var Today = new Date();
   if (Today.getHours() > 0) {
@@ -420,6 +386,20 @@ function Weather(context) {
       await context.sendChatAction('typing');
       await context.sendText(`${Wx} 最低溫度：${MinT} 最高溫度：${MaxT} 降雨機率：${PoP}% ${CI}`);
   });
+}
+
+async function Start_1A2B(context) {
+  var num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  var answer = '';
+  for (var i = 0; i < 4; i++) {
+    var idx = Math.floor(Math.random()*num.length);
+    answer += num[idx] + ',';
+    num.splice(idx, 1);
+  }
+  context.setState({
+    Ans_1A2B: answer.substring(0, answer.length - 1),
+  });
+  await context.sendText('好了，開始吧！');
 }
 
 function StockRealtime(context) {
@@ -448,7 +428,6 @@ function StockRealtime(context) {
     }
   });
 }
-
 function getDate(){
   var date = new Date();
   var year = date.getFullYear();
@@ -465,7 +444,6 @@ function getDate(){
         }
   return year + '-' + month + '-' + day + ' ' + Hours + ':' + Minutes + ':' + Seconds;
 }
-
 async function End_Blackjack(context, USERS_Blackjack, Poker_Blackjack) {
   var winner = [];
   var winner_point = 0;
@@ -521,7 +499,6 @@ async function End_Blackjack(context, USERS_Blackjack, Poker_Blackjack) {
     }
   }
 }
-
 function insertUser(context, addPoint) {
   if (context.session.platform == 'telegram') {
     id = context.event.message.from.id;
