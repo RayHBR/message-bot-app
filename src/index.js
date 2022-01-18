@@ -96,7 +96,7 @@ module.exports = async function App(context) {
       else if (res.rows[0].state != false && res.rows.length != 0) {
         var A = 0
         var B = 0;
-        var count = res.rows[0].count + 1;
+        var count = parseInt(res.rows[0].count) + 1;
         text = text.split('');
         for (var i = 0; i < 4; i++) {
           var ans = res.rows[0].answer.split(',');
