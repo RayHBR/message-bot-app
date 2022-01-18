@@ -90,7 +90,7 @@ module.exports = async function App(context) {
     return Start_1A2B;
   }
   else if (/^\d{4}$/.test(text)) {
-    var select_sql = `SELECT * FROM GUESS_AB WHERE ID = ${chat_id}`
+    var select_sql = `SELECT * FROM GUESS_AB WHERE ID = '${chat_id}'`
     client.query(select_sql, async (err, res) => {
       if (err) await context.sendText(err);
       else if (res.rows[0].state != false && res.rows.length != 0) {
@@ -403,9 +403,12 @@ async function Start_1A2B(context) {
   context.setState({
     Ans_1A2B: answer.substring(0, answer.length - 1),
   });
-  var select_sql = `SELECT * FROM GUESS_AB WHERE ID = ${chat_id}`
+  var select_sql = `SELECT * FROM GUESS_AB WHERE ID = '${chat_id}'`
   client.query(select_sql, async (err, res) => {
-    if (err) await context.sendText(err);
+    if (err) {
+      await context.sendText(err);
+      await context.sendText(answer.substring(0, answer.length - 1));
+    }
     else {
       if (res.rows.length == 0) {
         var insert_sql = `INSERT INTO GUESS_AB (ID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, true)`
