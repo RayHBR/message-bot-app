@@ -86,7 +86,8 @@ module.exports = async function App(context) {
 
   else if (text.toLowerCase() == 'info' && name == 'Ray') {
     await context.sendChatAction('typing');
-    await context.sendText(context);
+    await context.sendText(id);
+    await context.sendText(name);
   }
 
   else if (text.toLowerCase() == '!1a2b') {
