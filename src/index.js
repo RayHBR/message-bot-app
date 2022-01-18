@@ -9,7 +9,7 @@ const client = new Client({
 });
 client.connect();
 
-var id = 'superUser', name='superUser', to='superUser', type='superUser';
+var id = 'superUser', name='superUser', chat_id='superUser', type='superUser';
 var today = getDate();
 
 module.exports = async function App(context) {
@@ -18,7 +18,7 @@ module.exports = async function App(context) {
   if (platform == 'telegram') {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;
-    to = context.event.message.chat.id;
+    chat_id = context.event.message.chat.id;
     type = to > 0 ? "User" : "Group";
   }
 
@@ -80,14 +80,27 @@ module.exports = async function App(context) {
     })
   }
   else if (text.toLowerCase() == 'info' && name == 'Ray') {
-    create_sql = 'CREATE TABLE GUESS_AB(ID VARCHAR (20) NOT NULL PRIMARY KEY, ANSWER VARCHAR (4) NOT NULL, COUNT NUMERIC NOT NULL, STATE);'
+    drop_sql= 'DROP TABLE IF EXISTS GUESS_AB;'
+    client.query(drop_sql);
+    create_sql = 'CREATE TABLE GUESS_AB(ID VARCHAR (20) NOT NULL PRIMARY KEY, ANSWER VARCHAR (7) NOT NULL, COUNT NUMERIC NOT NULL, STATE Boolean NOT NULL);'
     client.query(create_sql);
+    
+  }
+  else if (text.toLowerCase() == 'info2' && name == 'Ray') {
+    var select_sql = `SELECT * FROM GUESS_AB WHERE ID = ${chat_id}`
+    client.query(select_sql, async (err, res) => {
+      if (err) await context.sendText(err);
+      else {
+          await context.sendText(res.rows.length);
+          await context.sendText(res.rows[0]);
+      }
+    })
   }
   else if (text.toLowerCase() == '!1a2b') {
     await context.sendChatAction('typing');
     return Start_1A2B;
   }
-  else if (/^\d{4}$/.test(text) && context.state.count != 0) {
+  /*else if (/^\d{4}$/.test(text) && context.state.count != 0) {
     await context.sendChatAction('typing');
     var A = 0
     var B = 0;
@@ -128,7 +141,7 @@ module.exports = async function App(context) {
       });
       await context.sendText(A + 'A' + B + 'B');
     }
-  }
+  }*/
   else if (text == '!21'){
     if (!context.state.State_Blackjack) {
       var suits = ['♠️', '♥️', '♦️', '♣️'];
@@ -361,7 +374,6 @@ module.exports = async function App(context) {
     }
   }
 }
-
 function Weather(context) {
   var Today = new Date();
   if (Today.getHours() > 0) {
@@ -387,7 +399,6 @@ function Weather(context) {
       await context.sendText(`${Wx} 最低溫度：${MinT} 最高溫度：${MaxT} 降雨機率：${PoP}% ${CI}`);
   });
 }
-
 async function Start_1A2B(context) {
   var num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
   var answer = '';
@@ -399,6 +410,20 @@ async function Start_1A2B(context) {
   context.setState({
     Ans_1A2B: answer.substring(0, answer.length - 1),
   });
+  var select_sql = `SELECT * FROM GUESS_AB WHERE ID = ${chat_id}`
+  client.query(select_sql, async (err, res) => {
+    if (err) await context.sendText(err);
+    else {
+      if (res.rows.length == 0) {
+        var insert_sql = `INSERT INTO GUESS_AB (ID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, True)`
+        client.query(insert_sql)
+      }
+      else {
+        var update_sql = `UPDATE GUESS_AB SET ANSWER='${answer.substring(0, answer.length - 1)}', STATE=True WHERE ID='${chat_id}'`
+        client.query(update_sql)
+      }
+    }
+  })
   await context.sendText('好了，開始吧！');
 }
 
