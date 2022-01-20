@@ -9,7 +9,7 @@ const client = new Client({
 });
 client.connect();
 
-var id = '000000001', name='superUser', chat_id='superUser', type='superUser';
+var id = '000000001', name='superUser', chat_id='000000001', type='superUser';
 var today = getDate();
 
 module.exports = async function App(context) {
@@ -122,7 +122,7 @@ module.exports = async function App(context) {
         }
         else {
           await context.sendChatAction('typing');
-          var update_sql = `UPDATE GUESS_AB SET COUNT='${count}' WHERE ID='${chat_id}'`
+          var update_sql = `UPDATE GUESS_AB SET COUNT='${count}', UPDATE_DATE='${today}' WHERE CHATID='${chat_id}'`
           client.query(update_sql)
           await context.sendText(A + 'A' + B + 'B');
         }
@@ -362,13 +362,12 @@ module.exports = async function App(context) {
     }
   }
   else if (text.toLowerCase() == 'info' && id == "226204113") {
-    //drop_sql= 'DROP TABLE IF EXISTS BLACKJACK;'
-    //drop_sql2= 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
-    //create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (156) NOT NULL, STATE VARCHAR (20));'
-    //create_sql2 = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (2) NOT NULL, STATE VARCHAR (20));'
-    
+    drop_sql= 'DROP TABLE IF EXISTS BLACKJACK;'
+    drop_sql2= 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
+    create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (156) NOT NULL, STATE VARCHAR (20));'
+    create_sql2 = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (2) NOT NULL, STATE VARCHAR (20));'   
   }
-  else if (text.toLowerCase() == 'info2'  && id == "226204113") {
+  else if (text.toLowerCase() == 'info2'  && id == "000000001") {
     select_sql = `SELECT * FROM USERS;`
     client.query(select_sql, async (err, res) => {
       if (err) await context.sendText(err);
@@ -384,6 +383,12 @@ module.exports = async function App(context) {
   }
   else if (text.toLowerCase() == 'info3') {
     await context.sendText("別這麼無聊");
+  }
+  else if (text.toLowerCase() == 'info4') {
+    await context.sendText("夠了喔!!");
+  }
+  else if (text.toLowerCase() == 'info5') {
+    await context.sendText("不理你了");
   }
 }
 function getDate(){
