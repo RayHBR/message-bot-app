@@ -79,12 +79,6 @@ module.exports = async function App(context) {
       }
     })
   }
-  else if (text.toLowerCase() == 'info' && name == 'Ray') {
-    drop_sql= 'DROP TABLE IF EXISTS GUESS_AB;'
-    client.query(drop_sql);
-    create_sql = 'CREATE TABLE GUESS_AB(ID VARCHAR (20) NOT NULL PRIMARY KEY, ANSWER VARCHAR (7), COUNT NUMERIC NOT NULL, STATE Boolean NOT NULL);'
-    client.query(create_sql);
-  }
   else if (text.toLowerCase() == '!1a2b') {
     await context.sendChatAction('typing');
     return Start_1A2B;
@@ -135,6 +129,13 @@ module.exports = async function App(context) {
       }
     })
   }
+  else if (text == '移除' && name == 'Ray'){
+    create_sql = 'CREATE TABLE USERS(USERSEQ serial NOT NULL, USERID VARCHAR (20) NOT NULL PRIMARY KEY, USERNAME VARCHAR (20) NOT NULL, POINT NUMERIC NOT NULL, UPDATE_DATE DATE NOT NULL);'
+    drop_sql= 'DROP TABLE IF EXISTS USERS;'
+    insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('1', 'TEST', '100' ,'${today}');`
+    delete_sql = `DELETE FROM USERS WHERE USERID = 'superUser';`
+    select_sql = 'SELECT * FROM USERS'
+  }
   else if (text == '!21'){
     if (!context.state.State_Blackjack) {
       var suits = ['♠️', '♥️', '♦️', '♣️'];
@@ -161,13 +162,6 @@ module.exports = async function App(context) {
     else {
       await context.sendText('遊戲已經開始囉！');
     }
-  }
-  else if (text == '移除' && name == 'Ray'){
-    create_sql = 'CREATE TABLE USERS(USERSEQ serial NOT NULL, USERID VARCHAR (20) NOT NULL PRIMARY KEY, USERNAME VARCHAR (20) NOT NULL, POINT NUMERIC NOT NULL, UPDATE_DATE DATE NOT NULL);'
-    drop_sql= 'DROP TABLE IF EXISTS USERS;'
-    insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('1', 'TEST', '100' ,'${today}');`
-    delete_sql = `DELETE FROM USERS WHERE USERID = 'superUser';`
-    select_sql = 'SELECT * FROM USERS'
   }
   else if (context.state.State_Blackjack) {
     var check_end = false;
@@ -366,6 +360,42 @@ module.exports = async function App(context) {
       await context.sendText("感謝大家遊玩21點！");
     }
   }
+  else if (text.toLowerCase() == 'info' && name == 'Ray') {
+    drop_sql= 'DROP TABLE IF EXISTS BLACKJACK;'
+    drop_sql2= 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
+    create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (156) NOT NULL, STATE VARCHAR (20));'
+    create_sql = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (2) NOT NULL, STATE VARCHAR (20));'
+  }
+  else if (text.toLowerCase() == 'info2') {
+    select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
+    client.query(select_sql, async (err, res) => {
+      if (err) await context.sendText(err);
+      else {
+        if (res.rows.length == 0) {
+          insertUser(context, 0)
+        }
+        else {
+          await context.sendText(res.rows[0]);
+        }
+      }
+    })
+  }
+}
+function getDate(){
+  var date = new Date();
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  var Hours = date.getHours();
+  var Minutes = date.getMinutes();
+  var Seconds = date.getSeconds();
+  if (month < 10) {
+      month = "0" + month;
+        }
+  if (day < 10) {
+       day = "0" + day;
+        }
+  return year + '-' + month + '-' + day + ' ' + Hours + ':' + Minutes + ':' + Seconds;
 }
 function Weather(context) {
   var Today = new Date();
@@ -422,7 +452,6 @@ async function Start_1A2B(context) {
   })
   await context.sendText('好了，開始吧！');
 }
-
 function StockRealtime(context) {
   var num = context.event.text.split(' ')
   const url = `https://stock-bot-app.herokuapp.com/StockRealtime/${num[1]}`
@@ -448,22 +477,6 @@ function StockRealtime(context) {
       await context.sendText(`股票代號有誤!`);
     }
   });
-}
-function getDate(){
-  var date = new Date();
-  var year = date.getFullYear();
-  var month = date.getMonth() + 1;
-  var day = date.getDate();
-  var Hours = date.getHours();
-  var Minutes = date.getMinutes();
-  var Seconds = date.getSeconds();
-  if (month < 10) {
-      month = "0" + month;
-        }
-  if (day < 10) {
-       day = "0" + day;
-        }
-  return year + '-' + month + '-' + day + ' ' + Hours + ':' + Minutes + ':' + Seconds;
 }
 async function End_Blackjack(context, USERS_Blackjack, Poker_Blackjack) {
   var winner = [];
@@ -528,7 +541,6 @@ function insertUser(context, addPoint) {
   insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('${id}', '${name}', ${100 + addPoint} ,'${today}')`
   client.query(insert_sql);
 }
-
 function updatePoint(context, Point ,addPoint) {
   if (context.session.platform == 'telegram') {
     id = context.event.message.from.id;
