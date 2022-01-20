@@ -9,7 +9,7 @@ const client = new Client({
 });
 client.connect();
 
-var id = 'superUser', name='superUser', chat_id='superUser', type='superUser';
+var id = '000000001', name='superUser', chat_id='superUser', type='superUser';
 var today = getDate();
 
 module.exports = async function App(context) {
@@ -69,8 +69,8 @@ module.exports = async function App(context) {
       }
     })
   }
-  else if (text.toLowerCase() == 'plus' && name == 'Ray') {
-    await context.sendChatAction('typing');
+  else if (text.toLowerCase() == "plus" && id == "226204113") {
+    await context.sendChatAction("typing");
     select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
     client.query(select_sql, async (err, res) => {
       if (err) await context.sendText(err);
@@ -130,7 +130,8 @@ module.exports = async function App(context) {
     })
   }
   else if (text == '移除' && name == 'Ray'){
-    create_sql = 'CREATE TABLE USERS(USERSEQ serial NOT NULL, USERID VARCHAR (20) NOT NULL PRIMARY KEY, USERNAME VARCHAR (20) NOT NULL, POINT NUMERIC NOT NULL, UPDATE_DATE DATE NOT NULL);'
+    create_sql = 'CREATE TABLE USERS(USERSEQ serial NOT NULL, USERID VARCHAR (9) NOT NULL PRIMARY KEY, USERNAME VARCHAR (100) NOT NULL, POINT NUMERIC NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'
+    create_sql = 'CREATE TABLE GUESS_AB(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, ANSWER VARCHAR (7) NULL, COUNT NUMERIC NOT NULL, STATE Boolean NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'    
     drop_sql= 'DROP TABLE IF EXISTS USERS;'
     insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('1', 'TEST', '100' ,'${today}');`
     delete_sql = `DELETE FROM USERS WHERE USERID = 'superUser';`
@@ -360,14 +361,15 @@ module.exports = async function App(context) {
       await context.sendText("感謝大家遊玩21點！");
     }
   }
-  else if (text.toLowerCase() == 'info' && name == 'Ray') {
-    drop_sql= 'DROP TABLE IF EXISTS BLACKJACK;'
-    drop_sql2= 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
-    create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (156) NOT NULL, STATE VARCHAR (20));'
-    create_sql = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (2) NOT NULL, STATE VARCHAR (20));'
+  else if (text.toLowerCase() == 'info' && id == "226204113") {
+    //drop_sql= 'DROP TABLE IF EXISTS BLACKJACK;'
+    //drop_sql2= 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
+    //create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (156) NOT NULL, STATE VARCHAR (20));'
+    //create_sql2 = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (2) NOT NULL, STATE VARCHAR (20));'
+    
   }
-  else if (text.toLowerCase() == 'info2') {
-    select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
+  else if (text.toLowerCase() == 'info2'  && id == "226204113") {
+    select_sql = `SELECT * FROM USERS;`
     client.query(select_sql, async (err, res) => {
       if (err) await context.sendText(err);
       else {
@@ -375,10 +377,13 @@ module.exports = async function App(context) {
           insertUser(context, 0)
         }
         else {
-          await context.sendText(res.rows[0]);
+          await context.sendText(JSON.stringify(res.rows));
         }
       }
     })
+  }
+  else if (text.toLowerCase() == 'info3') {
+    await context.sendText("別這麼無聊");
   }
 }
 function getDate(){
@@ -546,6 +551,6 @@ function updatePoint(context, Point ,addPoint) {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;
   }
-  update_sql = `UPDATE USERS SET POINT = ${parseInt(Point) + addPoint} WHERE USERID = '${id}'`
+  update_sql = `UPDATE USERS SET POINT = ${parseInt(Point) + addPoint}, UPDATE_DATE='${today}' WHERE USERID = '${id}'`
   client.query(update_sql);
 }
