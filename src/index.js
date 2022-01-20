@@ -114,7 +114,7 @@ module.exports = async function App(context) {
                 updatePoint(context, res.rows[0].point, 10)
               }
               await context.sendChatAction('typing');
-              var update_sql = `UPDATE GUESS_AB SET ANSWER='', COUNT=0, STATE=false WHERE CHATID='${chat_id}'`
+              var update_sql = `UPDATE GUESS_AB SET ANSWER='', COUNT=0, STATE=false, UPDATE_DATE='${today}' WHERE CHATID='${chat_id}'`
               client.query(update_sql)
               await context.sendText(name + ' 勝利了！一共猜了' + count + '次！');
             }
@@ -446,11 +446,11 @@ async function Start_1A2B(context) {
     }
     else {
       if (res.rows.length == 0) {
-        var insert_sql = `INSERT INTO GUESS_AB (CHATID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, true)`
+        var insert_sql = `INSERT INTO GUESS_AB (CHATID, ANSWER, COUNT, STATE, CREATE_DATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, true, '${today}')`
         client.query(insert_sql)
       }
       else {
-        var update_sql = `UPDATE GUESS_AB SET ANSWER='${answer.substring(0, answer.length - 1)}', STATE=true WHERE CHATID='${chat_id}'`
+        var update_sql = `UPDATE GUESS_AB SET ANSWER='${answer.substring(0, answer.length - 1)}', STATE=true, UPDATE_DATE='${today}' WHERE CHATID='${chat_id}'`
         client.query(update_sql)
       }
     }
