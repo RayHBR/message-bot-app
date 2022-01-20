@@ -84,7 +84,7 @@ module.exports = async function App(context) {
     return Start_1A2B;
   }
   else if (/^\d{4}$/.test(text)) {
-    var select_sql = `SELECT * FROM GUESS_AB WHERE ID = '${chat_id}'`
+    var select_sql = `SELECT * FROM GUESS_AB WHERE CHATID = '${chat_id}'`
     client.query(select_sql, async (err, res) => {
       if (err) await context.sendText(err);
       else if (res.rows[0].state != false && res.rows.length != 0) {
@@ -114,7 +114,7 @@ module.exports = async function App(context) {
                 updatePoint(context, res.rows[0].point, 10)
               }
               await context.sendChatAction('typing');
-              var update_sql = `UPDATE GUESS_AB SET ANSWER='', COUNT=0, STATE=false WHERE ID='${chat_id}'`
+              var update_sql = `UPDATE GUESS_AB SET ANSWER='', COUNT=0, STATE=false WHERE CHATID='${chat_id}'`
               client.query(update_sql)
               await context.sendText(name + ' 勝利了！一共猜了' + count + '次！');
             }
@@ -438,7 +438,7 @@ async function Start_1A2B(context) {
   context.setState({
     Ans_1A2B: answer.substring(0, answer.length - 1),
   });
-  var select_sql = `SELECT * FROM GUESS_AB WHERE ID = '${chat_id}'`
+  var select_sql = `SELECT * FROM GUESS_AB WHERE CHATID = '${chat_id}'`
   client.query(select_sql, async (err, res) => {
     if (err) {
       await context.sendText(err);
@@ -446,11 +446,11 @@ async function Start_1A2B(context) {
     }
     else {
       if (res.rows.length == 0) {
-        var insert_sql = `INSERT INTO GUESS_AB (ID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, true)`
+        var insert_sql = `INSERT INTO GUESS_AB (CHATID, ANSWER, COUNT, STATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, true)`
         client.query(insert_sql)
       }
       else {
-        var update_sql = `UPDATE GUESS_AB SET ANSWER='${answer.substring(0, answer.length - 1)}', STATE=true WHERE ID='${chat_id}'`
+        var update_sql = `UPDATE GUESS_AB SET ANSWER='${answer.substring(0, answer.length - 1)}', STATE=true WHERE CHATID='${chat_id}'`
         client.query(update_sql)
       }
     }
