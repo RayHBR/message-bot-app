@@ -1,5 +1,6 @@
-const fetch = require("node-fetch");
-const fs = require('fs')
+const fetchP = import('node-fetch').then(mod => mod.default)
+const fetch = (...args) => fetchP.then(fn => fn(...args))
+//const fs = require('fs')
 const { Client } = require('pg');
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
@@ -305,7 +306,7 @@ module.exports = async function App(context) {
     select_sql = `SELECT * FROM USERS`;
 
     client.query(select_sql, async (err, res) => {
-      console.log(res)
+      console.log(res.rows)
     })
   }
   else if (text == '!抽' && context.state.State_Blackjack == 'play_Blackjack') {

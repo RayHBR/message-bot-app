@@ -20,7 +20,7 @@ module.exports = {
       },
     },
   },
-  initialState: {State_Blackjack: false},
+  initialState: {},
   channels: {
     messenger: {
       enabled: false,
