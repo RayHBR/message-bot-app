@@ -1,14 +1,14 @@
 const fetchP = import('node-fetch').then(mod => mod.default)
 const fetch = (...args) => fetchP.then(fn => fn(...args))
 //const fs = require('fs')
-const { Client } = require('pg');
-/*const client = new Client({
+var pg = require("pg");
+var client = new pg.Client({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
   }
 });
-client.connect();*/
+client.connect();
 
 var id = '000000001', name = '元智幼稚園', chat_id = '000000001', type = 'superUser';
 var today = getDate();
