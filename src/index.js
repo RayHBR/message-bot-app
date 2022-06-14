@@ -34,7 +34,7 @@ module.exports = async function App(context) {
       await context.sendText(`Hi.`);
     }
   }
-  else if (text.indexOf("楷翊") != -1 && name == 'Ray') {
+  else if (text.indexOf("楷翊 ") != -1 && name == 'Ray') {
     await context.sendChatAction('typing');
     await context.sendText("@kaiyeee");
   }
