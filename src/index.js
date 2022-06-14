@@ -279,6 +279,32 @@ module.exports = async function App(context) {
       await context.sendText("感謝遊玩21點！");
     }
   }
+  else if (text.toLowerCase() == '!join' || text.toLowerCase() == '!start' || text == '!抽' || text == '!不抽') {
+    select_sql = `SELECT 'BLACKJACK' AS name, STATE FROM BLACKJACK WHERE CHATID='${chat_id}'`;
+    if (err) await context.sendText(err);
+    else {
+      if (res.rowCount != 0) {
+        if (res.rows[0]["state"] != "false") {
+          if (text.toLowerCase() == "!join" && res.rows[0]["state"] == "start") {
+            await context.sendChatAction('typing');
+            return Join_Blackjack(context);
+          }
+          else if (text.toLowerCase() == '!start' && res.rows[0]["state"] == "start") {
+            await context.sendChatAction('typing');
+            return Start_Blackjack(context);
+          }
+          else if (text == '!抽' && res.rows[0]["state"] == 'play') {
+            await context.sendChatAction('typing');
+            return GetCard_Blackjack(context)
+          }
+          else if (text == '!不抽' && res.rows[0]["state"] == 'play') {
+            await context.sendChatAction('typing');
+            return StopCard_Blackjack(context)
+          }
+        }
+      }
+    }
+  }
   else if (text.toLowerCase() == 'info' && id == "000000001") {
     drop_sql = 'DROP TABLE IF EXISTS BLACKJACK;'
     drop_sql2 = 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
@@ -302,108 +328,12 @@ module.exports = async function App(context) {
     //client.query(insert_sql);
   }
   else if (text.toLowerCase() == 'info2' && id == "000000001") {
-    select_sql = `SELECT * FROM USERS`;
+    select_sql = `SELECT 'BLACKJACK' AS NAME, STATE FROM BLACKJACK WHERE CHATID='${chat_id}'`;
 
     client.query(select_sql, async (err, res) => {
-      console.log(res.rows)
+      console.log(res.rowCount)
     })
   }
-  else if (text == '!抽' && context.state.State_Blackjack == 'play_Blackjack') {
-    var USERS_Blackjack = context.state.USERS_Blackjack;
-    var poker = context.state.Poker_Blackjack;
-    await context.sendChatAction('typing');
-    for (i = 0; i < USERS_Blackjack.length; i++) {
-      if (USERS_Blackjack[i].id == id) {
-        if (USERS_Blackjack[i].state == 'start') {
-          var point = USERS_Blackjack[i].point;
-          poker = context.state.Poker_Blackjack;
-          var idx = Math.floor(Math.random() * poker.length);
-          answer = poker[idx];
-          poker.splice(idx, 1);
-          USERS_Blackjack[i].pokers.push(answer)
-          if (/(A)/.test(answer.substr(2, 2)))
-            point += 11;
-          else if (/(10|J|Q|K)/.test(answer.substr(2, 2)))
-            point += 10;
-          else
-            point += parseInt(answer.substr(2, 2));
-          if (point > 21) {
-            USERS_Blackjack[i].point = point;
-            USERS_Blackjack[i].state = 'boom';
-            context.setState({
-              Poker_Blackjack: poker,
-              USERS_Blackjack: USERS_Blackjack
-            });
-            await context.sendText(USERS_Blackjack[i].name + ' 抽到了' + answer + '，現在點數是 ' + point + '，你爆炸啦！');
-            break;
-          }
-          else {
-            USERS_Blackjack[i].point = point;
-            context.setState({
-              Poker_Blackjack: poker,
-              USERS_Blackjack: USERS_Blackjack
-            });
-            await context.sendText(USERS_Blackjack[i].name + ' 抽到了' + answer + '，現在點數是 ' + point + '，還要繼續抽嗎？');
-            break;
-          }
-        }
-        else if (USERS_Blackjack[i].state == 'boom') {
-          await context.sendText(USERS_Blackjack[i].name + ' 你已經爆炸了，不能抽囉！');
-          break;
-        }
-        else if (USERS_Blackjack[i].state == 'skip') {
-          await context.sendText(USERS_Blackjack[i].name + ' 你已經結束了，不能抽囉！');
-          break;
-        }
-      }
-      else if (i == USERS_Blackjack.length - 1) {
-        await context.sendText(name + ' 你沒有加入遊戲！');
-      }
-    }
-    for (i = 0; i < USERS_Blackjack.length; i++) {
-      if (USERS_Blackjack[i].state == 'start') {
-        break;
-      }
-      else if (i == USERS_Blackjack.length - 1) {
-        check_end = true;
-      }
-    }
-    if (check_end) {
-      context.setState({
-        Poker_Blackjack: [],
-        State_Blackjack: false,
-        USERS_Blackjack: []
-      });
-      End_Blackjack(context, USERS_Blackjack, poker)
-    }
-  }
-  /*else {
-    select_sql = `SELECT 'BLACKJACK' AS NAME, STATE FROM BLACKJACK WHERE CHATID='${chat_id}'`
-    client.query(select_sql, async (err, res) => {
-      if (err) await context.sendText(err);
-      else {
-        if (res.rows[0]["state"] != "false") {
-          var endBlackjack = false;
-          if (text.toLowerCase() == "!join" && res.rows[0]["state"] == "start") {
-            await context.sendChatAction('typing');
-            return Join_Blackjack(context);
-          }
-          else if (text.toLowerCase() == '!start' && res.rows[0]["state"] == "start") {
-            await context.sendChatAction('typing');
-            return Start_Blackjack(context);
-          }
-          else if (text == '!抽' && res.rows[0]["state"] == 'play') {
-            await context.sendChatAction('typing');
-            return GetCard_Blackjack(context)
-          }
-          else if (text == '!不抽' && res.rows[0]["state"] == 'play') {
-            await context.sendChatAction('typing');
-            return GetCard_Blackjack(context)
-          }
-        }
-      }
-    })
-  }*/
 }
 
 function getDate() {
@@ -599,6 +529,36 @@ async function GetCard_Blackjack(context) {
         }
       })
     });
+  });
+}
+async function StopCard_Blackjack(context) {
+  select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.CHATID='${chat_id}' AND BD.USERID='${id}'`;
+  client.query(select_sql, async (err, res_d) => {
+    await context.sendChatAction('typing');
+    if (res_d.rows.length == 0) {
+      await context.sendText(name + ' 你沒有加入遊戲！');
+    }
+    else {
+      var USERS_Blackjack = res_d.rows[0];
+      if (USERS_Blackjack.state == 'start') {
+        var point = parseInt(USERS_Blackjack.point);
+          update_sql = `UPDATE BLACKJACK_DETAIL SET STATE='skip' WHERE CHATID='${chat_id}' AND USERID='${id}'`;
+          client.query(update_sql);
+          await context.sendText(USERS_Blackjack.username + ' 現在的點數是 ' + point + '！');
+      }
+      else if (USERS_Blackjack.state == 'boom') {
+        await context.sendText(USERS_Blackjack.username + ' 你已經爆炸了！');
+      }
+      else if (USERS_Blackjack.state == 'skip') {
+        await context.sendText(USERS_Blackjack.username + ' 你已經結束了！');
+      }
+    }
+    select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.CHATID='${chat_id}' AND BD.USERID!='000000001'`;
+    client.query(select_sql, async (err, res_d2) => {
+      if (res_d2.rows.length == 1) {
+        End_Blackjack(context)
+      }
+    })
   });
 }
 async function End_Blackjack(context, USERS_Blackjack, Poker_Blackjack) {
