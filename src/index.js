@@ -375,7 +375,7 @@ module.exports = async function App(context) {
         End_Blackjack(context, USERS_Blackjack, poker)
       }
     }
-    else {
+    /*else {
       select_sql = `SELECT 'BLACKJACK' AS NAME, STATE FROM BLACKJACK WHERE CHATID='${chat_id}'`
       client.query(select_sql, async (err, res) => {
         if (err) await context.sendText(err);
@@ -401,7 +401,7 @@ module.exports = async function App(context) {
           }
         }
       })
-    }
+    }*/
   }
   catch(err){
     console.log(err);
