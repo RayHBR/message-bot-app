@@ -1,0 +1,4 @@
+分析table有幾個column
+header footer
+x,y 根據底下的明細
+座標比較明細 b最大column 10個欄位座標要記住  

@@ -9,7 +9,7 @@ const client = new Client({
 });
 client.connect();
 
-var id = '000000001', name='superUser', chat_id='000000001', type='superUser';
+var id = '000000001', name = '元智幼稚園', chat_id = '000000001', type = 'superUser';
 var today = getDate();
 
 module.exports = async function App(context) {
@@ -49,10 +49,10 @@ module.exports = async function App(context) {
   else if (text == '明天天氣') {
     return Weather;
   }
-  else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
+  /*else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
     await context.sendChatAction('typing');
     return StockRealtime;
-  }
+  }*/
   else if (text.toLowerCase() == 'point') {
     await context.sendChatAction('typing');
     select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
@@ -75,7 +75,7 @@ module.exports = async function App(context) {
     client.query(select_sql, async (err, res) => {
       if (err) await context.sendText(err);
       else {
-          updatePoint(context, res.rows[0].point, 10)
+        updatePoint(context, res.rows[0].point, 10)
       }
     })
   }
@@ -129,105 +129,23 @@ module.exports = async function App(context) {
       }
     })
   }
-  else if (text == '移除' && name == 'Ray'){
-    create_sql = 'CREATE TABLE USERS(USERSEQ serial NOT NULL, USERID VARCHAR (9) NOT NULL PRIMARY KEY, USERNAME VARCHAR (100) NOT NULL, POINT NUMERIC NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'
+  else if (text == '移除' && name == 'Ray') {
+    /*create_sql = 'CREATE TABLE USERS(USERSEQ serial NOT NULL, USERID VARCHAR (9) NOT NULL PRIMARY KEY, USERNAME VARCHAR (100) NOT NULL, POINT NUMERIC NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'
     create_sql = 'CREATE TABLE GUESS_AB(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, ANSWER VARCHAR (7) NULL, COUNT NUMERIC NOT NULL, STATE Boolean NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'    
+    create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, POKER VARCHAR (211) NULL, STATE VARCHAR (10) NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'
+    create_sql = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, USERID VARCHAR (9), POKER VARCHAR (2) NOT NULL, STATE VARCHAR (10));'   
     drop_sql= 'DROP TABLE IF EXISTS USERS;'
     insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('1', 'TEST', '100' ,'${today}');`
     delete_sql = `DELETE FROM USERS WHERE USERID = 'superUser';`
-    select_sql = 'SELECT * FROM USERS'
+    select_sql = 'SELECT * FROM USERS'*/
   }
-  else if (text == '!21'){
-    if (!context.state.State_Blackjack) {
-      var suits = ['♠️', '♥️', '♦️', '♣️'];
-      var number = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-      var poker = [];
-      for (i = 0; i < suits.length; i++) {
-        for (j = 0; j < number.length; j++) {
-          poker.push(suits[i] + number[j]);
-        }
-      }
-      context.setState({
-        Poker_Blackjack: poker,
-        State_Blackjack: 'start_Blackjack',
-        USERS_Blackjack:[{
-          id: 'Bot', 
-          name: '元智幼稚園',
-          state: 'skip', 
-          pokers: [],
-          point: 0
-        }]
-      });
-      await context.sendText('好了，現在輸入 !join 加入遊戲吧，確定人數後輸入 !start 開始遊戲！');
-    }
-    else {
-      await context.sendText('遊戲已經開始囉！');
-    }
+  else if (text == '!21') {
+    await context.sendChatAction("typing");
+    return Begin_Blackjack;
   }
   else if (context.state.State_Blackjack) {
     var check_end = false;
-    if (text.toLowerCase() == '!join' && context.state.State_Blackjack == 'start_Blackjack') {
-      await context.sendChatAction('typing');
-      var USERS_Blackjack = context.state.USERS_Blackjack;
-      for (i = 0; i < USERS_Blackjack.length; i++) {
-        if (USERS_Blackjack[i].id == id) {
-          await context.sendText(name + " 你已經加入過了啦！");
-          break;
-        }
-        else if (i == USERS_Blackjack.length - 1) {
-          USERS_Blackjack.push({
-            id: id,
-            name: name,
-            state: 'start', 
-            pokers: [],
-            point: 0
-          })
-          context.setState({
-            USERS_Blackjack: USERS_Blackjack,
-          });
-          await context.sendText(name + " 歡迎您加入21點！");
-          break;
-        }
-      }
-    }
-    else if (text.toLowerCase() == '!start' && context.state.State_Blackjack == 'start_Blackjack') {
-      await context.sendChatAction('typing');
-      var USERS_Blackjack = context.state.USERS_Blackjack;
-      var result = "";
-      if (USERS_Blackjack.length == 1) {
-        await context.sendText("還沒有人加入遊戲QQ");
-      }
-      else {
-        await context.sendText("21點開始，輸入 !抽 可以抽牌，輸入 !不抽 代表結束歐！");
-        for (i = 0; i < USERS_Blackjack.length; i++) {
-          var point = USERS_Blackjack[i].point;
-          var poker = context.state.Poker_Blackjack;
-          var idx = Math.floor(Math.random()*poker.length);
-          answer = poker[idx];
-          poker.splice(idx, 1);
-          if (/(A)/.test(answer.substr(2,2)))
-            point += 11;
-          else if (/(10|J|Q|K)/.test(answer.substr(2,2)))
-            point += 10;
-          else {
-            point += parseInt(answer.substr(2,2));
-          }
-          USERS_Blackjack[i].pokers.push(answer)
-          USERS_Blackjack[i].point = point;
-          result += USERS_Blackjack[i].name + ' 抽到了' + answer + '，現在點數是 ' + point + '！\r\n';
-          context.setState({
-            Poker_Blackjack: poker,
-            USERS_Blackjack: USERS_Blackjack
-          });
-        }
-        context.setState({
-          State_Blackjack: 'play_Blackjack'
-        });
-        await context.sendChatAction('typing');
-        await context.sendText(result);
-      }
-    }
-    else if (text == '!抽'  && context.state.State_Blackjack == 'play_Blackjack') {
+    if (text == '!抽' && context.state.State_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       var poker = context.state.Poker_Blackjack;
       await context.sendChatAction('typing');
@@ -236,16 +154,16 @@ module.exports = async function App(context) {
           if (USERS_Blackjack[i].state == 'start') {
             var point = USERS_Blackjack[i].point;
             poker = context.state.Poker_Blackjack;
-            var idx = Math.floor(Math.random()*poker.length);
+            var idx = Math.floor(Math.random() * poker.length);
             answer = poker[idx];
             poker.splice(idx, 1);
             USERS_Blackjack[i].pokers.push(answer)
-            if (/(A)/.test(answer.substr(2,2)))
+            if (/(A)/.test(answer.substr(2, 2)))
               point += 11;
-            else if (/(10|J|Q|K)/.test(answer.substr(2,2)))
+            else if (/(10|J|Q|K)/.test(answer.substr(2, 2)))
               point += 10;
             else
-              point += parseInt(answer.substr(2,2));
+              point += parseInt(answer.substr(2, 2));
             if (point > 21) {
               USERS_Blackjack[i].point = point;
               USERS_Blackjack[i].state = 'boom';
@@ -291,7 +209,7 @@ module.exports = async function App(context) {
         context.setState({
           Poker_Blackjack: [],
           State_Blackjack: false,
-          USERS_Blackjack:[]
+          USERS_Blackjack: []
         });
         End_Blackjack(context, USERS_Blackjack, poker)
       }
@@ -328,22 +246,22 @@ module.exports = async function App(context) {
         context.setState({
           Poker_Blackjack: [],
           State_Blackjack: false,
-          USERS_Blackjack:[]
+          USERS_Blackjack: []
         });
         End_Blackjack(context, USERS_Blackjack, poker)
       }
     }
-    else if (text == '!手牌'  && context.state.State_Blackjack == 'play_Blackjack') {
+    else if (text == '!手牌' && context.state.State_Blackjack == 'play_Blackjack') {
       var USERS_Blackjack = context.state.USERS_Blackjack;
       var result = '你現在的手牌有';
       await context.sendChatAction('typing');
       for (i = 0; i < USERS_Blackjack.length; i++) {
         if (USERS_Blackjack[i].id == id) {
-            var pokers = USERS_Blackjack[i].pokers;
-            for (j = 0; j < pokers.length; j++) {
-              result += pokers[j] + '、'
-            }
-            break;
+          var pokers = USERS_Blackjack[i].pokers;
+          for (j = 0; j < pokers.length; j++) {
+            result += pokers[j] + '、'
+          }
+          break;
         }
         else if (i == USERS_Blackjack.length - 1) {
           await context.sendText(name + ' 你沒有加入遊戲！');
@@ -355,43 +273,140 @@ module.exports = async function App(context) {
       context.setState({
         Poker_Blackjack: [],
         State_Blackjack: false,
-        USERS_Blackjack:[]
+        USERS_Blackjack: []
       });
       await context.sendChatAction('typing');
-      await context.sendText("感謝大家遊玩21點！");
+      await context.sendText("感謝遊玩21點！");
     }
   }
-  else if (text.toLowerCase() == 'info' && id == "226204113") {
-    drop_sql= 'DROP TABLE IF EXISTS BLACKJACK;'
-    drop_sql2= 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
-    create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (156) NOT NULL, STATE VARCHAR (20));'
-    create_sql2 = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (20) NOT NULL PRIMARY KEY, USERID VARCHAR (7), POKER VARCHAR (2) NOT NULL, STATE VARCHAR (20));'   
+  else if (text.toLowerCase() == 'info' && id == "000000001") {
+    drop_sql = 'DROP TABLE IF EXISTS BLACKJACK;'
+    drop_sql2 = 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
+    create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, POKER VARCHAR (211) NULL, STATE VARCHAR (10) NOT NULL, CREATE_DATE TIMESTAMP NOT NULL);'
+    create_sql2 = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, USERID VARCHAR (9), POKER VARCHAR (211) NOT NULL, POINT NUMERIC NOT NULL, STATE VARCHAR (10));'
+    client.query(drop_sql);
+    client.query(drop_sql2);
+    client.query(create_sql);
+    client.query(create_sql2);
+    var suits = ['♠️', '♥️', '♦️', '♣️'];
+    var number = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    var poker = [];
+    for (i = 0; i < suits.length; i++) {
+      for (j = 0; j < number.length; j++) {
+        poker.push(suits[i] + number[j]);
+      }
+    }
+
+    insert_sql = `INSERT INTO BLACKJACK (CHATID, POKER, STATE, CREATE_DATE) VALUES ('${chat_id}', '${poker.join(',')}', false, '${today}');`
+    //context.sendText(poker.join(','));
+    //client.query(insert_sql);
   }
-  else if (text.toLowerCase() == 'info2'  && id == "000000001") {
-    select_sql = `SELECT * FROM USERS;`
+  else if (text.toLowerCase() == 'info2' && id == "000000001") {
+    select_sql = `SELECT * FROM USERS`;
+
+    client.query(select_sql, async (err, res) => {
+      console.log(res)
+    })
+  }
+  else if (text == '!抽' && context.state.State_Blackjack == 'play_Blackjack') {
+    var USERS_Blackjack = context.state.USERS_Blackjack;
+    var poker = context.state.Poker_Blackjack;
+    await context.sendChatAction('typing');
+    for (i = 0; i < USERS_Blackjack.length; i++) {
+      if (USERS_Blackjack[i].id == id) {
+        if (USERS_Blackjack[i].state == 'start') {
+          var point = USERS_Blackjack[i].point;
+          poker = context.state.Poker_Blackjack;
+          var idx = Math.floor(Math.random() * poker.length);
+          answer = poker[idx];
+          poker.splice(idx, 1);
+          USERS_Blackjack[i].pokers.push(answer)
+          if (/(A)/.test(answer.substr(2, 2)))
+            point += 11;
+          else if (/(10|J|Q|K)/.test(answer.substr(2, 2)))
+            point += 10;
+          else
+            point += parseInt(answer.substr(2, 2));
+          if (point > 21) {
+            USERS_Blackjack[i].point = point;
+            USERS_Blackjack[i].state = 'boom';
+            context.setState({
+              Poker_Blackjack: poker,
+              USERS_Blackjack: USERS_Blackjack
+            });
+            await context.sendText(USERS_Blackjack[i].name + ' 抽到了' + answer + '，現在點數是 ' + point + '，你爆炸啦！');
+            break;
+          }
+          else {
+            USERS_Blackjack[i].point = point;
+            context.setState({
+              Poker_Blackjack: poker,
+              USERS_Blackjack: USERS_Blackjack
+            });
+            await context.sendText(USERS_Blackjack[i].name + ' 抽到了' + answer + '，現在點數是 ' + point + '，還要繼續抽嗎？');
+            break;
+          }
+        }
+        else if (USERS_Blackjack[i].state == 'boom') {
+          await context.sendText(USERS_Blackjack[i].name + ' 你已經爆炸了，不能抽囉！');
+          break;
+        }
+        else if (USERS_Blackjack[i].state == 'skip') {
+          await context.sendText(USERS_Blackjack[i].name + ' 你已經結束了，不能抽囉！');
+          break;
+        }
+      }
+      else if (i == USERS_Blackjack.length - 1) {
+        await context.sendText(name + ' 你沒有加入遊戲！');
+      }
+    }
+    for (i = 0; i < USERS_Blackjack.length; i++) {
+      if (USERS_Blackjack[i].state == 'start') {
+        break;
+      }
+      else if (i == USERS_Blackjack.length - 1) {
+        check_end = true;
+      }
+    }
+    if (check_end) {
+      context.setState({
+        Poker_Blackjack: [],
+        State_Blackjack: false,
+        USERS_Blackjack: []
+      });
+      End_Blackjack(context, USERS_Blackjack, poker)
+    }
+  }
+  else {
+    select_sql = `SELECT 'BLACKJACK' AS NAME, STATE FROM BLACKJACK WHERE CHATID='${chat_id}'`
     client.query(select_sql, async (err, res) => {
       if (err) await context.sendText(err);
       else {
-        if (res.rows.length == 0) {
-          insertUser(context, 0)
-        }
-        else {
-          await context.sendText(JSON.stringify(res.rows));
+        if (res.rows[0]["state"] != "false") {
+          var endBlackjack = false;
+          if (text.toLowerCase() == "!join" && res.rows[0]["state"] == "start") {
+            await context.sendChatAction('typing');
+            return Join_Blackjack(context);
+          }
+          else if (text.toLowerCase() == '!start' && res.rows[0]["state"] == "start") {
+            await context.sendChatAction('typing');
+            return Start_Blackjack(context);
+          }
+          else if (text == '!抽' && res.rows[0]["state"] == 'play') {
+            await context.sendChatAction('typing');
+            return GetCard_Blackjack(context)
+          }
+          else if (text == '!不抽' && res.rows[0]["state"] == 'play') {
+            await context.sendChatAction('typing');
+            return GetCard_Blackjack(context)
+          }
         }
       }
     })
   }
-  else if (text.toLowerCase() == 'info3') {
-    await context.sendText("別這麼無聊");
-  }
-  else if (text.toLowerCase() == 'info4') {
-    await context.sendText("夠了喔!!");
-  }
-  else if (text.toLowerCase() == 'info5') {
-    await context.sendText("不理你了");
-  }
 }
-function getDate(){
+
+function getDate() {
   var date = new Date();
   var year = date.getFullYear();
   var month = date.getMonth() + 1;
@@ -400,11 +415,11 @@ function getDate(){
   var Minutes = date.getMinutes();
   var Seconds = date.getSeconds();
   if (month < 10) {
-      month = "0" + month;
-        }
+    month = "0" + month;
+  }
   if (day < 10) {
-       day = "0" + day;
-        }
+    day = "0" + day;
+  }
   return year + '-' + month + '-' + day + ' ' + Hours + ':' + Minutes + ':' + Seconds;
 }
 function Weather(context) {
@@ -416,10 +431,10 @@ function Weather(context) {
   var month = (Today.getMonth() + 1 < 10 ? '0' : '') + (Today.getMonth() + 1);
   var day = (Today.getDate() < 10 ? '0' : '') + Today.getDate();
   const url = `https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=${process.env.WEATHER_TOKEN}&format=JSON&locationName=新北市&startTime=${year}-${month}-${day}T06:00:00`
-  fetch(encodeURI(url), {method:'GET'})
-  .then(res => {
+  fetch(encodeURI(url), { method: 'GET' })
+    .then(res => {
       return res.text();
-  }).then(async result => {
+    }).then(async result => {
       var results = JSON.parse(result).records.location[0];
       var Wx = results.weatherElement[0].time[0].parameter.parameterName;
       var PoP = results.weatherElement[1].time[0].parameter.parameterName;
@@ -430,28 +445,22 @@ function Weather(context) {
       await context.sendText(`${year}/${month}/${day} 天氣預報`);
       await context.sendChatAction('typing');
       await context.sendText(`${Wx} 最低溫度：${MinT} 最高溫度：${MaxT} 降雨機率：${PoP}% ${CI}`);
-  });
+    });
 }
 async function Start_1A2B(context) {
   var num = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
   var answer = '';
   for (var i = 0; i < 4; i++) {
-    var idx = Math.floor(Math.random()*num.length);
+    var idx = Math.floor(Math.random() * num.length);
     answer += num[idx] + ',';
     num.splice(idx, 1);
   }
-  context.setState({
-    Ans_1A2B: answer.substring(0, answer.length - 1),
-  });
   var select_sql = `SELECT * FROM GUESS_AB WHERE CHATID = '${chat_id}'`
   client.query(select_sql, async (err, res) => {
-    if (err) {
-      await context.sendText(err);
-      await context.sendText(answer.substring(0, answer.length - 1));
-    }
+    if (err) await context.sendText(err);
     else {
       if (res.rows.length == 0) {
-        var insert_sql = `INSERT INTO GUESS_AB (CHATID, ANSWER, COUNT, STATE, CREATE_DATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, true, '${today}')`
+        var insert_sql = `INSERT INTO GUESS_AB (CHATID, ANSWER, COUNT, STATE, CREATE_DATE) VALUES ('${chat_id}', '${answer.substring(0, answer.length - 1)}', 0, '', '${today}')`
         client.query(insert_sql)
       }
       else {
@@ -462,30 +471,134 @@ async function Start_1A2B(context) {
   })
   await context.sendText('好了，開始吧！');
 }
-function StockRealtime(context) {
-  var num = context.event.text.split(' ')
-  const url = `https://stock-bot-app.herokuapp.com/StockRealtime/${num[1]}`
-  //const url = `http://127.0.0.1:5000/StockRealtime/${num[1]}`
-  fetch(encodeURI(url), {method:'GET'})
-  .then(res => {
-    return res.text();
-  }).then(async result => {
-    var rt = JSON.parse(result);
-    if (rt.success == true) {
-      var name = rt.info.name;
-      var price = rt.realtime.latest_trade_price
-      if (price == '-') 
-      {
-        await context.sendText(`${name}: - (`);
+async function Begin_Blackjack(context) {
+  var suits = ['♠️', '♥️', '♦️', '♣️'];
+  var number = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  var poker = [];
+  for (i = 0; i < suits.length; i++) {
+    for (j = 0; j < number.length; j++) {
+      poker.push(suits[i] + number[j]);
+    }
+  }
+  var select_sql = `SELECT * FROM BLACKJACK WHERE CHATID = '${chat_id}'`
+  client.query(select_sql, async (err, res) => {
+    if (err) await context.sendText(err);
+    else {
+      if (res.rows.length == 0) {
+        var insert_sql = `INSERT INTO BLACKJACK (CHATID, POKER, STATE, CREATE_DATE) VALUES ('${chat_id}', '${poker.join(',')}', 'start', '${today}');`
+        client.query(insert_sql)
+        insert_sql = `INSERT INTO BLACKJACK_DETAIL (CHATID, USERID, POKER, POINT, STATE) VALUES ('${chat_id}', '${id}', '', 0, 'start')`;
+        client.query(insert_sql);
+        await context.sendText('好了，現在輸入 !join 加入遊戲吧，確定人數後輸入 !start 開始遊戲！');
       }
-      else 
-      {
-        await context.sendText(`${name}: ${price}`);
+      else {
+        await context.sendText('遊戲已經開始囉！');
       }
+    }
+  })
+}
+async function Join_Blackjack(context) {
+  select_sql = `SELECT * FROM BLACKJACK_DETAIL WHERE CHATID='${chat_id}' AND USERID='${id}'`
+  client.query(select_sql, async (err, res) => {
+    if (res.rows.length == 0) {
+      insert_sql = `INSERT INTO BLACKJACK_DETAIL (CHATID, USERID, POKER, POINT, STATE) VALUES ('${chat_id}', '${id}', '', 0, 'start')`;
+      client.query(insert_sql);
+      await context.sendText(name + " 歡迎您加入21點！");
     }
     else {
-      await context.sendText(`股票代號有誤!`);
+      await context.sendText(name + " 你已經加入過了啦！");
     }
+  })
+}
+async function Start_Blackjack(context) {
+  select_sql = `SELECT * FROM BLACKJACK WHERE CHATID='${chat_id}'`;
+  client.query(select_sql, async (err, res) => {
+    var poker = res.rows[0].poker.split(',');
+    select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.CHATID='${chat_id}' AND BD.USERID='${id}'`;
+    client.query(select_sql, async (err, res_d) => {
+      if (res_d.rows.length == 0) {
+        await context.sendText("還沒有人加入遊戲QQ");
+      }
+      else {
+        await context.sendText("21點開始，輸入 !抽 可以抽牌，輸入 !不抽 代表結束歐！");
+        var result = "";
+        for (i = 0; i < res_d.rows.length; i++) {
+          var point = parseInt(res_d.rows[i].point);
+          var idx = Math.floor(Math.random() * poker.length);
+          var answer = poker[idx];
+          poker.splice(idx, 1);
+          if (/(A)/.test(answer.substr(2, 2)))
+            point += 11;
+          else if (/(10|J|Q|K)/.test(answer.substr(2, 2)))
+            point += 10;
+          else {
+            point += parseInt(answer.substr(2, 2));
+          }
+          update_sql = `UPDATE BLACKJACK_DETAIL SET POKER='${answer}', POINT = ${parseInt(point)} WHERE CHATID='${chat_id}' AND USERID='${id}'`;
+          client.query(update_sql);
+          result += res_d.rows[i].username + ' 抽到了' + answer + '，現在點數是 ' + parseInt(point) + '！\r\n';
+        }
+        update_sql = `UPDATE BLACKJACK SET STATE = 'play' WHERE CHATID='${chat_id}'`;
+        client.query(update_sql);
+        await context.sendText(result);
+      }
+    });
+  });
+}
+async function GetCard_Blackjack(context) {
+  select_sql = `SELECT * FROM BLACKJACK WHERE CHATID='${chat_id}'`;
+  client.query(select_sql, async (err, res) => {
+    var poker = res.rows[0].poker.split(',');
+    select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.CHATID='${chat_id}' AND BD.USERID='${id}'`;
+    client.query(select_sql, async (err, res_d) => {
+      await context.sendChatAction('typing');
+      if (res_d.rows.length == 0) {
+        await context.sendText(name + ' 你沒有加入遊戲！');
+      }
+      else {
+        var USERS_Blackjack = res_d.rows[0];
+        if (USERS_Blackjack.state == 'start') {
+          var point = parseInt(USERS_Blackjack.point);
+          var idx = Math.floor(Math.random() * poker.length);
+          answer = poker[idx];
+          poker.splice(idx, 1);
+          user_poker = USERS_Blackjack.poker.split(',');
+          user_poker.push(answer)
+          if (/(A)/.test(answer.substr(2, 2)))
+            point += 11;
+          else if (/(10|J|Q|K)/.test(answer.substr(2, 2)))
+            point += 10;
+          else
+            point += parseInt(answer.substr(2, 2));
+          if (point > 21) {
+            update_sql = `UPDATE BLACKJACK_DETAIL SET POKER='${answer}', POINT = ${point}, STATE='boom' WHERE CHATID='${chat_id}' AND USERID='${id}'`;
+            client.query(update_sql);
+            await context.sendText(USERS_Blackjack.username + ' 抽到了' + answer + '，現在點數是 ' + point + '，你爆炸啦！');
+          }
+          else {
+            USERS_Blackjack.point = point;
+            update_sql = `UPDATE BLACKJACK_DETAIL SET POKER='${answer}', POINT = ${point} WHERE CHATID='${chat_id}' AND USERID='${id}'`;
+            client.query(update_sql);
+            await context.sendText(USERS_Blackjack.username + ' 抽到了' + answer + '，現在點數是 ' + point + '，還要繼續抽嗎？');
+          }
+        }
+        else if (USERS_Blackjack.state == 'boom') {
+          await context.sendText(USERS_Blackjack.username + ' 你已經爆炸了，不能抽囉！');
+        }
+        else if (USERS_Blackjack.state == 'skip') {
+          await context.sendText(USERS_Blackjack.username + ' 你已經結束了，不能抽囉！');
+        }
+        else if (USERS_Blackjack.state == 'NYT') {
+          await context.sendText(USERS_Blackjack.username + ' 還沒輪到你抽牌！');
+        }
+      }
+      select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.CHATID='${chat_id}' AND BD.USERID!='000000001'`;
+      client.query(select_sql, async (err, res_d2) => {
+        if (res_d2.rows.length == 1) {
+          End_Blackjack(context)
+        }
+      })
+    });
   });
 }
 async function End_Blackjack(context, USERS_Blackjack, Poker_Blackjack) {
@@ -495,16 +608,16 @@ async function End_Blackjack(context, USERS_Blackjack, Poker_Blackjack) {
   while (USERS_Blackjack[0].point <= 21) {
     var point;
     var poker = Poker_Blackjack;
-    var idx = Math.floor(Math.random()*poker.length);
+    var idx = Math.floor(Math.random() * poker.length);
     answer = poker[idx];
-    if (/(A)/.test(answer.substr(2,2)))
+    if (/(A)/.test(answer.substr(2, 2)))
       point = 11;
-    else if (/(10|J|Q|K)/.test(answer.substr(2,2)))
+    else if (/(10|J|Q|K)/.test(answer.substr(2, 2)))
       point = 10;
     else
-      point = parseInt(answer.substr(2,2))
-    if (point + USERS_Blackjack[0].point <= 21){
-      USERS_Blackjack[0].point += point; 
+      point = parseInt(answer.substr(2, 2))
+    if (point + USERS_Blackjack[0].point <= 21) {
+      USERS_Blackjack[0].point += point;
       await context.sendChatAction('typing');
       result += '元智幼稚園抽到了' + answer + '，現在點數是 ' + USERS_Blackjack[0].point + '！' + '\r\n';
       USERS_Blackjack[0].pokers.push(answer)
@@ -543,15 +656,39 @@ async function End_Blackjack(context, USERS_Blackjack, Poker_Blackjack) {
     }
   }
 }
+function StockRealtime(context) {
+  var num = context.event.text.split(' ')
+  const url = `https://stock-bot-app.herokuapp.com/StockRealtime/${num[1]}`
+  //const url = `http://127.0.0.1:5000/StockRealtime/${num[1]}`
+  fetch(encodeURI(url), { method: 'GET' })
+    .then(res => {
+      return res.text();
+    }).then(async result => {
+      var rt = JSON.parse(result);
+      if (rt.success == true) {
+        var name = rt.info.name;
+        var price = rt.realtime.latest_trade_price
+        if (price == '-') {
+          await context.sendText(`${name}: - (`);
+        }
+        else {
+          await context.sendText(`${name}: ${price}`);
+        }
+      }
+      else {
+        await context.sendText(`股票代號有誤!`);
+      }
+    });
+}
 function insertUser(context, addPoint) {
   if (context.session.platform == 'telegram') {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;
   }
-  insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('${id}', '${name}', ${100 + addPoint} ,'${today}')`
+  insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, CREATE_DATE) VALUES ('${id}', '${name}', ${100 + addPoint} ,'${today}')`
   client.query(insert_sql);
 }
-function updatePoint(context, Point ,addPoint) {
+function updatePoint(context, Point, addPoint) {
   if (context.session.platform == 'telegram') {
     id = context.event.message.from.id;
     name = context.event.message.from.firstName;

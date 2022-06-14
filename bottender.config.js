@@ -20,8 +20,7 @@ module.exports = {
       },
     },
   },
-  initialState: {Count_1A2B: 0, Ans_1A2B: 0,
-     Poker_Blackjack: [], State_Blackjack: false, USERS_Blackjack: []},
+  initialState: {State_Blackjack: false},
   channels: {
     messenger: {
       enabled: false,
