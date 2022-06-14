@@ -676,7 +676,7 @@ function StockRealtime(context) {
         }
       }
       else {
-        await context.sendText(`股票代號有誤!`);
+        await context.sendText(`股票代號有誤！`);
       }
     });
 }
