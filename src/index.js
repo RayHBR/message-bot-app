@@ -49,10 +49,10 @@ module.exports = async function App(context) {
   else if (text == '明天天氣') {
     return Weather;
   }
-  /*else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
+  else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
     await context.sendChatAction('typing');
     return StockRealtime;
-  }*/
+  }
   else if (text.toLowerCase() == 'point') {
     await context.sendChatAction('typing');
     select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
