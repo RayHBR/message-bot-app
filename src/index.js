@@ -404,10 +404,10 @@ module.exports = async function App(context) {
     }
   }
   catch(err){
-    client.end();
+    console.log(err);
   }
   finally {
-    
+    client.end();
   }
 }
 
