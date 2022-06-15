@@ -175,7 +175,7 @@ module.exports = async function App(context) {
     drop_sql = 'DROP TABLE IF EXISTS BLACKJACK;'
     drop_sql2 = 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
     create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, POKER VARCHAR (211) NULL, STATE VARCHAR (10) NOT NULL, CREATE_DATE TIMESTAMP NOT NULL);'
-    create_sql2 = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, USERID VARCHAR (9), POKER VARCHAR (211) NOT NULL, POINT NUMERIC NOT NULL, STATE VARCHAR (10));'
+    create_sql2 = 'CREATE TABLE BLACKJACK_DETAIL(ID SERIAL PRIMARY KEY, CHATID VARCHAR (15) NOT NULL, USERID VARCHAR (9) NOT NULL, POKER VARCHAR (211) NOT NULL, POINT NUMERIC NOT NULL, STATE VARCHAR (10));'
     client.query(drop_sql);
     client.query(drop_sql2);
     client.query(create_sql);
@@ -194,8 +194,7 @@ module.exports = async function App(context) {
     //client.query(insert_sql);
   }
   else if (text.toLowerCase() == 'info2' && id == "000000001") {
-    select_sql = `SELECT * FROM BLACKJACK_DETAIL where point=(select max(point) from BLACKJACK_DETAIL where chatid='000000001')`;
-
+    select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID`;
     client.query(select_sql, async (err, res) => {
       console.log(res.rows)
     })
@@ -325,7 +324,7 @@ async function Start_Blackjack(context) {
       else {
         await context.sendText("21點開始，輸入 !抽 可以抽牌，輸入 !不抽 代表結束歐！");
         var result = "";
-        for (i = 0; i < res_d.rows.length; i++) {
+        for (i = 0; i < res_d.rowCount; i++) {
           var point = parseInt(res_d.rows[i].point);
           var idx = Math.floor(Math.random() * poker.length);
           var answer = poker[idx];
@@ -337,19 +336,13 @@ async function Start_Blackjack(context) {
           else {
             point += parseInt(answer.substr(2, 2));
           }
-          update_sql = `UPDATE BLACKJACK_DETAIL SET POKER='${answer}', POINT = ${parseInt(point)} WHERE CHATID='${chat_id}' AND USERID='${id}'`;
+          update_sql = `UPDATE BLACKJACK_DETAIL SET POKER='${answer}', POINT = ${parseInt(point)} WHERE CHATID='${chat_id}' AND USERID='${res_d.rows[i]['userid']}'`;
           client.query(update_sql);
           result += res_d.rows[i].username + ' 抽到了' + answer + '，現在點數是 ' + parseInt(point) + '！\r\n';
         }
         update_sql = `UPDATE BLACKJACK SET STATE = 'play' WHERE CHATID='${chat_id}'`;
         client.query(update_sql);
         await context.sendText(result);
-        select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.CHATID='${chat_id}' AND BD.state='start' AND BD.USERID!='000000001'`;
-        client.query(select_sql, async (err, res_d2) => {
-          if (res_d2.rowCount == 0) {
-            End_Blackjack(context)
-          }
-        })
       }
     });
   });
@@ -421,9 +414,9 @@ async function StopCard_Blackjack(context) {
       var USERS_Blackjack = res_d.rows[0];
       if (USERS_Blackjack.state == 'start') {
         var point = parseInt(USERS_Blackjack.point);
-          update_sql = `UPDATE BLACKJACK_DETAIL SET STATE='skip' WHERE CHATID='${chat_id}' AND USERID='${id}'`;
-          client.query(update_sql);
-          await context.sendText(USERS_Blackjack.username + ' 現在的點數是 ' + point + '！');
+        update_sql = `UPDATE BLACKJACK_DETAIL SET STATE='skip' WHERE CHATID='${chat_id}' AND USERID='${id}'`;
+        client.query(update_sql);
+        await context.sendText(USERS_Blackjack.username + ' 現在的點數是 ' + point + '！');
       }
       else if (USERS_Blackjack.state == 'boom') {
         await context.sendText(USERS_Blackjack.username + ' 你已經爆炸了！');
@@ -432,7 +425,7 @@ async function StopCard_Blackjack(context) {
         await context.sendText(USERS_Blackjack.username + ' 你已經結束了！');
       }
     }
-    select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.CHATID='${chat_id}' AND BD.USERID!='000000001'`;
+    select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.CHATID='${chat_id}' AND BD.state='start' AND BD.USERID!='000000001'`;
     client.query(select_sql, async (err, res_d2) => {
       if (res_d2.rowCount == 0) {
         End_Blackjack(context)
