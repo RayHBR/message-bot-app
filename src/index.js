@@ -194,7 +194,8 @@ module.exports = async function App(context) {
     //client.query(insert_sql);
   }
   else if (text.toLowerCase() == 'info2' && id == "000000001") {
-    select_sql = `SELECT MAX(point) AS point FROM BLACKJACK_DETAIL WHERE point<=21`;
+    select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.point=(SELECT MAX(point) AS point FROM BLACKJACK_DETAIL where chatid='-1001299333637' and point<=21)`;
+    //select_sql = `SELECT MAX(point) AS point FROM BLACKJACK_DETAIL`;
     client.query(select_sql, async (err, res) => {
       console.log(res.rows)
     })
@@ -468,7 +469,7 @@ async function End_Blackjack(context) {
         }
       }
       await context.sendText(result);
-      select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.point=(SELECT MAX(point) AS point FROM BLACKJACK_DETAIL WHERE chatid='${chat_id} AND point<=21')`;
+      select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.point=(SELECT MAX(point) AS point FROM BLACKJACK_DETAIL WHERE chatid='${chat_id}' AND point<=21)`;
       client.query(select_sql, async (err, res_2) => {
         if (res_2.rowCount > 1) {
           var winner_name = '';
