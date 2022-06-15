@@ -200,6 +200,13 @@ module.exports = async function App(context) {
       console.log(res.rows)
     })
   }
+  else if (text.toLowerCase() == 'info3' && id == "000000001") {
+    
+    delete_sql = `DELETE FROM BLACKJACK;`
+    delete_sql2 = `DELETE FROM BLACKJACK_DETAIL;`
+    client.query(delete_sql);
+    client.query(delete_sql2);
+  }
 }
 
 function getDate() {
@@ -280,10 +287,10 @@ async function Begin_Blackjack(context) {
   client.query(select_sql, async (err, res) => {
     if (err) await context.sendText(err);
     else {
-      if (res.rows.length == 0) {
+      if (res.rowCount == 0) {
         var insert_sql = `INSERT INTO BLACKJACK (CHATID, POKER, STATE, CREATE_DATE) VALUES ('${chat_id}', '${poker.join(',')}', 'start', '${today}');`
         client.query(insert_sql)
-        insert_sql = `INSERT INTO BLACKJACK_DETAIL (CHATID, USERID, POKER, POINT, STATE) VALUES ('${chat_id}', '${id}', '', 0, 'start')`;
+        insert_sql = `INSERT INTO BLACKJACK_DETAIL (CHATID, USERID, POKER, POINT, STATE) VALUES ('${chat_id}', '000000001', '', 0, 'start')`;
         client.query(insert_sql);
         await context.sendText('好了，現在輸入 !join 加入遊戲吧，確定人數後輸入 !start 開始遊戲！');
       }
@@ -296,7 +303,7 @@ async function Begin_Blackjack(context) {
 async function Join_Blackjack(context) {
   select_sql = `SELECT * FROM BLACKJACK_DETAIL WHERE CHATID='${chat_id}' AND USERID='${id}'`
   client.query(select_sql, async (err, res) => {
-    if (res.rows.length == 0) {
+    if (res.rowCount == 0) {
       insert_sql = `INSERT INTO BLACKJACK_DETAIL (CHATID, USERID, POKER, POINT, STATE) VALUES ('${chat_id}', '${id}', '', 0, 'start')`;
       client.query(insert_sql);
       await context.sendText(name + " 歡迎您加入21點！");
@@ -310,9 +317,9 @@ async function Start_Blackjack(context) {
   select_sql = `SELECT * FROM BLACKJACK WHERE CHATID='${chat_id}'`;
   client.query(select_sql, async (err, res) => {
     var poker = res.rows[0].poker.split(',');
-    select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.CHATID='${chat_id}' AND BD.USERID='${id}'`;
+    select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.CHATID='${chat_id}' AND BD.USERID!='000000001'`;
     client.query(select_sql, async (err, res_d) => {
-      if (res_d.rows.length == 0) {
+      if (res_d.rowCount == 0) {
         await context.sendText("還沒有人加入遊戲QQ");
       }
       else {
