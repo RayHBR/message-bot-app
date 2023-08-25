@@ -16,196 +16,198 @@ var today = getDate();
 module.exports = async function App(context) {
   var text = context.event.text;
   var platform = context.session.platform;
-  if (platform == 'telegram') {
-    id = context.event.message.from.id;
-    name = context.event.message.from.firstName;
-    chat_id = context.event.message.chat.id;
-    type = chat_id > 0 ? "User" : "Group";
-  }
-  if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
-    await context.sendChatAction('typing');
-    if (context.session.platform == 'telegram') {
-      await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
+  if (context.event.isText) {
+    if (platform == 'telegram') {
+      id = context.event.message.from.id;
+      name = context.event.message.from.firstName;
+      chat_id = context.event.message.chat.id;
+      type = chat_id > 0 ? "User" : "Group";
     }
-    else if (context.session.platform == 'line') {
-      await context.sendText(`Hi.`);
-    }
-    else {
-      await context.sendText(`Hi.`);
-    }
-  }
-  else if (text.indexOf("楷翊") != -1 && name == 'Ray') {
-    await context.sendChatAction('typing');
-    await context.sendText("@kaiyeee");
-  }
-  else if (/^(ㄅㄖ)$/.test(text)) {
-    await context.sendChatAction('typing');
-    await context.sendText("@Ray_Huang");
-  }
-  else if (text.indexOf("星爆") != -1) {
-    await context.sendChatAction('typing');
-    await context.sendDocument('https://raw.githubusercontent.com/RayHBR/message-bot-app/main/images/%E6%98%9F%E7%88%86%E8%87%89.gif');
-  }
-  else if (text == '明天天氣') {
-    return Weather;
-  }
-  else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
-    await context.sendChatAction('typing');
-    return StockRealtime;
-  }
-  else if (text.toLowerCase() == 'point') {
-    await context.sendChatAction('typing');
-    select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
-    client.query(select_sql, async (err, res) => {
-      if (err) await context.sendText(err);
+    if (/[Hh][Ii]/g.test(text) && !/[a-zA-Z0-9][Hh][Ii]|[Hh][Ii][a-zA-Z0-9]/g.test(text)) {
+      await context.sendChatAction('typing');
+      if (context.session.platform == 'telegram') {
+        await context.sendText(`Hi, ${context.event.message.from.firstName}.`);
+      }
+      else if (context.session.platform == 'line') {
+        await context.sendText(`Hi.`);
+      }
       else {
-        if (res.rows.length == 0) {
-          insertUser(context, 0)
-          await context.sendText(name + ' 你現在有 100 點！');
-        }
+        await context.sendText(`Hi.`);
+      }
+    }
+    else if (text.indexOf("楷翊") != -1 && name == 'Ray') {
+      await context.sendChatAction('typing');
+      await context.sendText("@kaiyeee");
+    }
+    else if (/^(ㄅㄖ)$/.test(text)) {
+      await context.sendChatAction('typing');
+      await context.sendText("@Ray_Huang");
+    }
+    else if (text.indexOf("星爆") != -1) {
+      await context.sendChatAction('typing');
+      await context.sendDocument('https://raw.githubusercontent.com/RayHBR/message-bot-app/main/images/%E6%98%9F%E7%88%86%E8%87%89.gif');
+    }
+    else if (text == '明天天氣') {
+      return Weather;
+    }
+    else if (/(^!stock [0-9][0-9][0-9][0-9])/.test(text)) {
+      await context.sendChatAction('typing');
+      return StockRealtime;
+    }
+    else if (text.toLowerCase() == 'point') {
+      await context.sendChatAction('typing');
+      select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
+      client.query(select_sql, async (err, res) => {
+        if (err) await context.sendText(err);
         else {
-          await context.sendText(name + ' 你現在有 ' + res.rows[0].point + ' 點！');
-        }
-      }
-    })
-  }
-  else if (text.toLowerCase() == "plus" && id == "226204113") {
-    await context.sendChatAction("typing");
-    select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
-    client.query(select_sql, async (err, res) => {
-      if (err) await context.sendText(err);
-      else {
-        updatePoint(context, res.rows[0].point, 10)
-      }
-    })
-  }
-  else if (text.toLowerCase() == '!1a2b') {
-    await context.sendChatAction('typing');
-    return Start_1A2B;
-  }
-  else if (/^\d{4}$/.test(text)) {
-    var select_sql = `SELECT * FROM GUESS_AB WHERE CHATID = '${chat_id}'`
-    client.query(select_sql, async (err, res) => {
-      if (err) await context.sendText(err);
-      else if (res.rows[0].state != false && res.rows.length != 0) {
-        var A = 0
-        var B = 0;
-        var count = parseInt(res.rows[0].count) + 1;
-        text = text.split('');
-        for (var i = 0; i < 4; i++) {
-          var ans = res.rows[0].answer.split(',');
-          var idx = ans.indexOf(text[i]);
-          if (idx != -1) {
-            if (idx == i)
-              A++;
-            else
-              B++;
+          if (res.rows.length == 0) {
+            insertUser(context, 0)
+            await context.sendText(name + ' 你現在有 100 點！');
+          }
+          else {
+            await context.sendText(name + ' 你現在有 ' + res.rows[0].point + ' 點！');
           }
         }
-        if (A == 4) {
-          select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
-          client.query(select_sql, async (err, res) => {
-            if (err) await context.sendText(err);
-            else {
-              if (res.rows.length == 0) {
-                insertUser(context, 10)
-              }
+      })
+    }
+    else if (text.toLowerCase() == "plus" && id == "226204113") {
+      await context.sendChatAction("typing");
+      select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
+      client.query(select_sql, async (err, res) => {
+        if (err) await context.sendText(err);
+        else {
+          updatePoint(context, res.rows[0].point, 10)
+        }
+      })
+    }
+    else if (text.toLowerCase() == '!1a2b') {
+      await context.sendChatAction('typing');
+      return Start_1A2B;
+    }
+    else if (/^\d{4}$/.test(text)) {
+      var select_sql = `SELECT * FROM GUESS_AB WHERE CHATID = '${chat_id}'`
+      client.query(select_sql, async (err, res) => {
+        if (err) await context.sendText(err);
+        else if (res.rows[0].state != false && res.rows.length != 0) {
+          var A = 0
+          var B = 0;
+          var count = parseInt(res.rows[0].count) + 1;
+          text = text.split('');
+          for (var i = 0; i < 4; i++) {
+            var ans = res.rows[0].answer.split(',');
+            var idx = ans.indexOf(text[i]);
+            if (idx != -1) {
+              if (idx == i)
+                A++;
+              else
+                B++;
+            }
+          }
+          if (A == 4) {
+            select_sql = `SELECT * FROM USERS WHERE USERID = '${id}'`
+            client.query(select_sql, async (err, res) => {
+              if (err) await context.sendText(err);
               else {
-                updatePoint(context, res.rows[0].point, 10)
+                if (res.rows.length == 0) {
+                  insertUser(context, 10)
+                }
+                else {
+                  updatePoint(context, res.rows[0].point, 10)
+                }
+                await context.sendChatAction('typing');
+                var update_sql = `UPDATE GUESS_AB SET ANSWER='', COUNT=0, STATE=false, UPDATE_DATE='${today}' WHERE CHATID='${chat_id}'`
+                client.query(update_sql)
+                await context.sendText(name + ' 勝利了！一共猜了' + count + '次！');
               }
-              await context.sendChatAction('typing');
-              var update_sql = `UPDATE GUESS_AB SET ANSWER='', COUNT=0, STATE=false, UPDATE_DATE='${today}' WHERE CHATID='${chat_id}'`
-              client.query(update_sql)
-              await context.sendText(name + ' 勝利了！一共猜了' + count + '次！');
-            }
-          })
+            })
+          }
+          else {
+            await context.sendChatAction('typing');
+            var update_sql = `UPDATE GUESS_AB SET COUNT='${count}', UPDATE_DATE='${today}' WHERE CHATID='${chat_id}'`
+            client.query(update_sql)
+            await context.sendText(A + 'A' + B + 'B');
+          }
         }
+      })
+    }
+    else if (text == '移除' && name == 'Ray') {
+      /*create_sql = 'CREATE TABLE USERS(USERSEQ serial NOT NULL, USERID VARCHAR (9) NOT NULL PRIMARY KEY, USERNAME VARCHAR (100) NOT NULL, POINT NUMERIC NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'
+      create_sql = 'CREATE TABLE GUESS_AB(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, ANSWER VARCHAR (7) NULL, COUNT NUMERIC NOT NULL, STATE Boolean NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'    
+      create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, POKER VARCHAR (211) NULL, STATE VARCHAR (10) NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'
+      create_sql = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, USERID VARCHAR (9), POKER VARCHAR (2) NOT NULL, STATE VARCHAR (10));'   
+      drop_sql= 'DROP TABLE IF EXISTS USERS;'
+      insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('1', 'TEST', '100' ,'${today}');`
+      delete_sql = `DELETE FROM USERS WHERE USERID = 'superUser';`
+      select_sql = 'SELECT * FROM USERS'*/
+    }
+    else if (text == '!21') {
+      await context.sendChatAction("typing");
+      return Begin_Blackjack;
+    }
+    else if (text.toLowerCase() == '!join' || text.toLowerCase() == '!start' || text == '!抽' || text == '!不抽') {
+      var select_sql = `SELECT 'BLACKJACK' AS name, STATE FROM BLACKJACK WHERE CHATID='${chat_id}'`;
+      client.query(select_sql, async (err, res) => {
+        if (err) await context.sendText(err);
         else {
-          await context.sendChatAction('typing');
-          var update_sql = `UPDATE GUESS_AB SET COUNT='${count}', UPDATE_DATE='${today}' WHERE CHATID='${chat_id}'`
-          client.query(update_sql)
-          await context.sendText(A + 'A' + B + 'B');
-        }
-      }
-    })
-  }
-  else if (text == '移除' && name == 'Ray') {
-    /*create_sql = 'CREATE TABLE USERS(USERSEQ serial NOT NULL, USERID VARCHAR (9) NOT NULL PRIMARY KEY, USERNAME VARCHAR (100) NOT NULL, POINT NUMERIC NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'
-    create_sql = 'CREATE TABLE GUESS_AB(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, ANSWER VARCHAR (7) NULL, COUNT NUMERIC NOT NULL, STATE Boolean NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'    
-    create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, POKER VARCHAR (211) NULL, STATE VARCHAR (10) NOT NULL, CREATE_DATE TIMESTAMP NOT NULL, UPDATE_DATE TIMESTAMP NULL);'
-    create_sql = 'CREATE TABLE BLACKJACK_DETAIL(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, USERID VARCHAR (9), POKER VARCHAR (2) NOT NULL, STATE VARCHAR (10));'   
-    drop_sql= 'DROP TABLE IF EXISTS USERS;'
-    insert_sql = `INSERT INTO USERS (USERID, USERNAME, POINT, UPDATE_DATE) VALUES ('1', 'TEST', '100' ,'${today}');`
-    delete_sql = `DELETE FROM USERS WHERE USERID = 'superUser';`
-    select_sql = 'SELECT * FROM USERS'*/
-  }
-  else if (text == '!21') {
-    await context.sendChatAction("typing");
-    return Begin_Blackjack;
-  }
-  else if (text.toLowerCase() == '!join' || text.toLowerCase() == '!start' || text == '!抽' || text == '!不抽') {
-    var select_sql = `SELECT 'BLACKJACK' AS name, STATE FROM BLACKJACK WHERE CHATID='${chat_id}'`;
-    client.query(select_sql, async (err, res) => {
-      if (err) await context.sendText(err);
-      else {
-        if (res.rowCount != 0) {
-          if (res.rows[0]["state"] != "false") {
-            if (text.toLowerCase() == "!join" && res.rows[0]["state"] == "start") {
-              await context.sendChatAction('typing');
-              return Join_Blackjack(context);
-            }
-            else if (text.toLowerCase() == '!start' && res.rows[0]["state"] == "start") {
-              await context.sendChatAction('typing');
-              return Start_Blackjack(context);
-            }
-            else if (text == '!抽' && res.rows[0]["state"] == 'play') {
-              await context.sendChatAction('typing');
-              return GetCard_Blackjack(context)
-            }
-            else if (text == '!不抽' && res.rows[0]["state"] == 'play') {
-              await context.sendChatAction('typing');
-              return StopCard_Blackjack(context)
+          if (res.rowCount != 0) {
+            if (res.rows[0]["state"] != "false") {
+              if (text.toLowerCase() == "!join" && res.rows[0]["state"] == "start") {
+                await context.sendChatAction('typing');
+                return Join_Blackjack(context);
+              }
+              else if (text.toLowerCase() == '!start' && res.rows[0]["state"] == "start") {
+                await context.sendChatAction('typing');
+                return Start_Blackjack(context);
+              }
+              else if (text == '!抽' && res.rows[0]["state"] == 'play') {
+                await context.sendChatAction('typing');
+                return GetCard_Blackjack(context)
+              }
+              else if (text == '!不抽' && res.rows[0]["state"] == 'play') {
+                await context.sendChatAction('typing');
+                return StopCard_Blackjack(context)
+              }
             }
           }
         }
-      }
-    })
-  }
-  else if (text.toLowerCase() == 'info' && id == "000000001") {
-    drop_sql = 'DROP TABLE IF EXISTS BLACKJACK;'
-    drop_sql2 = 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
-    create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, POKER VARCHAR (211) NULL, STATE VARCHAR (10) NOT NULL, CREATE_DATE TIMESTAMP NOT NULL);'
-    create_sql2 = 'CREATE TABLE BLACKJACK_DETAIL(ID SERIAL PRIMARY KEY, CHATID VARCHAR (15) NOT NULL, USERID VARCHAR (9) NOT NULL, POKER VARCHAR (211) NOT NULL, POINT NUMERIC NOT NULL, STATE VARCHAR (10));'
-    client.query(drop_sql);
-    client.query(drop_sql2);
-    client.query(create_sql);
-    client.query(create_sql2);
-    var suits = ['♠️', '♥️', '♦️', '♣️'];
-    var number = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-    var poker = [];
-    for (i = 0; i < suits.length; i++) {
-      for (j = 0; j < number.length; j++) {
-        poker.push(suits[i] + number[j]);
-      }
+      })
     }
+    else if (text.toLowerCase() == 'info' && id == "000000001") {
+      drop_sql = 'DROP TABLE IF EXISTS BLACKJACK;'
+      drop_sql2 = 'DROP TABLE IF EXISTS BLACKJACK_DETAIL;'
+      create_sql = 'CREATE TABLE BLACKJACK(CHATID VARCHAR (15) NOT NULL PRIMARY KEY, POKER VARCHAR (211) NULL, STATE VARCHAR (10) NOT NULL, CREATE_DATE TIMESTAMP NOT NULL);'
+      create_sql2 = 'CREATE TABLE BLACKJACK_DETAIL(ID SERIAL PRIMARY KEY, CHATID VARCHAR (15) NOT NULL, USERID VARCHAR (9) NOT NULL, POKER VARCHAR (211) NOT NULL, POINT NUMERIC NOT NULL, STATE VARCHAR (10));'
+      client.query(drop_sql);
+      client.query(drop_sql2);
+      client.query(create_sql);
+      client.query(create_sql2);
+      var suits = ['♠️', '♥️', '♦️', '♣️'];
+      var number = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+      var poker = [];
+      for (i = 0; i < suits.length; i++) {
+        for (j = 0; j < number.length; j++) {
+          poker.push(suits[i] + number[j]);
+        }
+      }
 
-    insert_sql = `INSERT INTO BLACKJACK (CHATID, POKER, STATE, CREATE_DATE) VALUES ('${chat_id}', '${poker.join(',')}', false, '${today}');`
-    //context.sendText(poker.join(','));
-    //client.query(insert_sql);
-  }
-  else if (text.toLowerCase() == 'info2' && id == "000000001") {
-    select_sql = `SELECT BD.*, U.USERNAME FROM BLACKJACK_DETAIL BD LEFT JOIN USERS U ON BD.USERID = U.USERID WHERE BD.point=(SELECT MAX(point) AS point FROM BLACKJACK_DETAIL where chatid='-1001299333637' and point<=21)`;
-    //select_sql = `SELECT MAX(point) AS point FROM BLACKJACK_DETAIL`;
-    client.query(select_sql, async (err, res) => {
-      console.log(res.rows)
-    })
-  }
-  else if (text.toLowerCase() == 'info3' && id == "000000001") {
-    
-    delete_sql = `DELETE FROM BLACKJACK;`
-    delete_sql2 = `DELETE FROM BLACKJACK_DETAIL;`
-    client.query(delete_sql);
-    client.query(delete_sql2);
+      insert_sql = `INSERT INTO BLACKJACK (CHATID, POKER, STATE, CREATE_DATE) VALUES ('${chat_id}', '${poker.join(',')}', false, '${today}');`
+      //context.sendText(poker.join(','));
+      //client.query(insert_sql);
+    }
+    else if (text.toLowerCase() == 'info2' && id == "000000001") {
+      select_sql = `SELECT * FROM GUESS_AB where chatid='-1001299333637'`;
+      //select_sql = `SELECT MAX(point) AS point FROM BLACKJACK_DETAIL`;
+      client.query(select_sql, async (err, res) => {
+        console.log(res.rows)
+      })
+    }
+    else if (text.toLowerCase() == 'info3' && id == "000000001") {
+      
+      delete_sql = `DELETE FROM BLACKJACK;`
+      delete_sql2 = `DELETE FROM BLACKJACK_DETAIL;`
+      client.query(delete_sql);
+      client.query(delete_sql2);
+    }
   }
 }
 
